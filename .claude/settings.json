@@ -1,7 +1,25 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --yes)"
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --yes)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(node -e \"const l = require\\('lucide-react'\\); console.log\\(Object.keys\\(l\\).filter\\(k => k.toLowerCase\\(\\).includes\\('insta'\\) || k.toLowerCase\\(\\).includes\\('face'\\) || k.toLowerCase\\(\\).includes\\('social'\\) || k.toLowerCase\\(\\).includes\\('share'\\) || k.toLowerCase\\(\\).includes\\('link'\\)\\).join\\(', '\\)\\)\")",
+      "Bash(python3 -m json.tool)",
+      "Read(//Users/jude.osafo/iCloud Drive \\(Archive\\)/Documents/JoseStudio/**)",
+      "Read(//Users/jude.osafo/iCloud Drive \\(Archive\\)/Documents/JoseStudio/node_modules/**)",
+      "Bash(node -e \"require.resolve\\('@tailwindcss/postcss', {paths: ['/Users/jude.osafo/iCloud Drive \\(Archive\\)/Documents/JoseStudio/vision_studio']}\\)\")",
+      "Bash(cat \"/Users/jude.osafo/package.json\" 2>/dev/null | head -5 || echo \"No ~/package.json\" *)",
+      "Read(//Users/jude.osafo/**)",
+      "Bash(node -e \"require.resolve\\('@tailwindcss/postcss'\\)\")",
+      "Bash(npm root *)",
+      "Bash(find \"/Users/jude.osafo\" -name \"postcss\" -path \"*@tailwindcss*\" -maxdepth 8 2>/dev/null | head -5 *)",
+      "Read(//usr/local/**)",
+      "Bash(npm list *)",
+      "Bash(npm uninstall *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d['version']\\)\")",
+      "Bash(npx next *)",
+      "Bash(node -e \"console.log\\(require.resolve\\('lucide-react'\\)\\)\")"
     ]
   }
 }
