@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import VenueAutocomplete from '../components/VenueAutocomplete';
 
 type FormState = {
   name: string;
@@ -33,7 +34,21 @@ export default function ContactPage() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    if (name === 'phone') {
+      const digits = value.replace(/\D/g, '').slice(0, 10);
+      let formatted = digits;
+      if (digits.length >= 7) {
+        formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+      } else if (digits.length >= 4) {
+        formatted = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+      } else if (digits.length >= 1) {
+        formatted = `(${digits}`;
+      }
+      setForm((prev) => ({ ...prev, phone: formatted }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -191,13 +206,9 @@ export default function ContactPage() {
                   <label className="text-xs tracking-[0.2em] uppercase text-[#6b6460] block mb-2">
                     Venue / Location
                   </label>
-                  <input
-                    type="text"
-                    name="venue"
+                  <VenueAutocomplete
                     value={form.venue}
-                    onChange={handleChange}
-                    className="w-full bg-transparent border border-white/15 px-4 py-3 text-[#f0ebe3] placeholder:text-[#6b6460]/60 focus:border-[#c9a96e] focus:outline-none transition-colors text-sm"
-                    placeholder="The Grand Ballroom, NYC"
+                    onChange={(val) => setForm((prev) => ({ ...prev, venue: val }))}
                   />
                 </div>
                 <div>

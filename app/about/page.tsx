@@ -72,12 +72,13 @@ export default function AboutPage() {
         </div>
 
         <div className="space-y-8">
-          <div className="relative h-[420px]">
+          <div className="relative h-130">
             <Image
               src="/images/IMG_3179.jpeg"
               alt="Elegant portrait"
               fill
-              className="object-cover object-top"
+              className="object-cover"
+              style={{ objectPosition: '50% 52%' }}
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, ChevronDown } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import HeroSlider from './components/HeroSlider';
 
 const teaserPhotos = [
   { src: '/images/0M0A6970.jpeg', alt: 'Bride at the altar', span: 'md:col-span-2 md:row-span-2', pos: 'object-center' },
@@ -20,51 +21,7 @@ const stats = [
 export default function Home() {
   return (
     <main>
-      {/* Hero */}
-      <section className="relative h-screen flex items-end pb-24 overflow-hidden">
-        <Image
-          src="/images/0M0A6893.jpeg"
-          alt="Wedding ceremony"
-          fill
-          priority
-          className="object-cover object-center scale-105"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0c0b09] via-[#0c0b09]/30 to-transparent" />
-
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 w-full">
-          <p className="text-xs tracking-[0.35em] uppercase text-[#c9a96e] mb-6">
-            Wedding &amp; Event Photography
-          </p>
-          <h1 className="font-serif text-5xl sm:text-7xl lg:text-8xl font-light leading-none text-[#f0ebe3] max-w-3xl">
-            Every moment<br />
-            <em className="italic text-[#c9a96e]">deserves</em> to<br />
-            live forever.
-          </h1>
-          <div className="mt-10 flex flex-col sm:flex-row gap-4">
-            <Link
-              href="/portfolio"
-              className="inline-flex items-center gap-3 text-xs tracking-[0.2em] uppercase px-8 py-4 bg-[#c9a96e] text-[#0c0b09] hover:bg-[#f0ebe3] transition-colors duration-300"
-            >
-              View Portfolio <ArrowRight size={14} />
-            </Link>
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-3 text-xs tracking-[0.2em] uppercase px-8 py-4 border border-[#f0ebe3]/40 text-[#f0ebe3] hover:border-[#f0ebe3] transition-colors duration-300"
-            >
-              Book a Session
-            </Link>
-          </div>
-        </div>
-
-        <a
-          href="#teaser"
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[#f0ebe3]/40 hover:text-[#c9a96e] transition-colors animate-bounce"
-          aria-label="Scroll down"
-        >
-          <ChevronDown size={24} />
-        </a>
-      </section>
+      <HeroSlider />
 
       {/* Stats */}
       <section className="border-y border-white/8 py-12">
@@ -95,7 +52,7 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 auto-rows-[320px] md:auto-rows-[380px]">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 auto-rows-[450px] md:auto-rows-[520px]">
           {teaserPhotos.map((photo, i) => (
             <div key={i} className={`relative overflow-hidden group ${photo.span}`}>
               <Image
