@@ -3,11 +3,11 @@ import Image from 'next/image';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 
 const teaserPhotos = [
-  { src: '/images/0M0A6970.jpeg', alt: 'Bride at the altar', span: 'md:col-span-2 md:row-span-2' },
-  { src: '/images/0M0A0717.jpeg', alt: 'Portrait in red', span: '' },
-  { src: '/images/0M0A6831.jpeg', alt: 'Wedding couple', span: '' },
-  { src: '/images/IMG_3179.jpeg', alt: 'Elegant portrait', span: '' },
-  { src: '/images/0M0A7015.jpeg', alt: 'Wedding ring detail', span: '' },
+  { src: '/images/0M0A6970.jpeg', alt: 'Bride at the altar', span: 'md:col-span-2 md:row-span-2', pos: 'object-center' },
+  { src: '/images/0M0A0717.jpeg', alt: 'Portrait in red', span: '', pos: 'object-center' },
+  { src: '/images/0M0A6831.jpeg', alt: 'Wedding couple', span: '', pos: 'object-center' },
+  { src: '/images/IMG_3179.jpeg', alt: 'Elegant portrait', span: '', pos: 'object-center' },
+  { src: '/images/0M0A7015.jpeg', alt: 'Wedding ring detail', span: '', pos: 'object-center' },
 ];
 
 const stats = [
@@ -95,14 +95,14 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 auto-rows-[220px] md:auto-rows-[260px]">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 auto-rows-[320px] md:auto-rows-[380px]">
           {teaserPhotos.map((photo, i) => (
             <div key={i} className={`relative overflow-hidden group ${photo.span}`}>
               <Image
                 src={photo.src}
                 alt={photo.alt}
                 fill
-                className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                className={`object-cover ${photo.pos} transition-transform duration-700 group-hover:scale-105`}
                 sizes="(max-width: 768px) 50vw, 33vw"
               />
               <div className="absolute inset-0 bg-[#0c0b09]/0 group-hover:bg-[#0c0b09]/30 transition-colors duration-500" />

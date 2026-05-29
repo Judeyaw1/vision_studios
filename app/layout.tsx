@@ -4,13 +4,17 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
 export const metadata: Metadata = {
-  title: 'Vision Studio — Wedding & Event Photography',
+  title: 'Vision Studios — Wedding & Event Photography',
   description:
-    'Vision Studio captures the beauty of love, light, and life\'s most meaningful moments. Award-winning wedding and event photography.',
-  keywords: ['wedding photography', 'event photography', 'Vision Studio', 'Jose Vargas'],
+    'Vision Studios captures the beauty of love, light, and life\'s most meaningful moments. Wedding, event, and portrait photography in the DMV area.',
+  keywords: ['wedding photography', 'event photography', 'Vision Studios', 'DMV photography'],
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
   openGraph: {
-    title: 'Vision Studio — Wedding & Event Photography',
-    description: 'Capturing love stories across the globe.',
+    title: 'Vision Studios — Wedding & Event Photography',
+    description: 'Capturing love stories across the DMV.',
     type: 'website',
   },
 };
