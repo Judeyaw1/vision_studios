@@ -84,7 +84,7 @@ export default function AboutPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="font-serif text-3xl text-[#c9a96e]">500+</p>
+              <p className="font-serif text-3xl text-[#c9a96e]">50+</p>
               <p className="text-xs tracking-[0.2em] uppercase text-[#6b6460] mt-1">Sessions captured</p>
             </div>
             <div>

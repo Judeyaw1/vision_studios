@@ -12,8 +12,8 @@ const teaserPhotos = [
 ];
 
 const stats = [
-  { value: '500+', label: 'Sessions' },
-  { value: '5+', label: 'Years' },
+  { value: '50+', label: 'Sessions' },
+  { value: '2+', label: 'Years' },
   { value: 'DMV', label: 'Based in' },
   { value: '98%', label: 'Satisfaction' },
 ];

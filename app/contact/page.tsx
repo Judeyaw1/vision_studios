@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Loader2 } from 'lucide-react';
 import VenueAutocomplete from '../components/VenueAutocomplete';
 
 type FormState = {
@@ -63,15 +63,15 @@ export default function ContactPage() {
   return (
     <main className="pt-20">
       {/* Header */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-20">
+      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-12 sm:py-20">
         <p className="text-xs tracking-[0.3em] uppercase text-[#c9a96e] mb-4">Get In Touch</p>
-        <h1 className="font-serif text-5xl sm:text-6xl font-light text-[#f0ebe3]">
+        <h1 className="font-serif text-4xl sm:text-6xl font-light text-[#f0ebe3]">
           Let&apos;s Create<br />
           <em className="italic text-[#c9a96e]">Together</em>
         </h1>
       </section>
 
-      <section className="max-w-7xl mx-auto px-6 lg:px-12 pb-32 grid lg:grid-cols-5 gap-20">
+      <section className="max-w-7xl mx-auto px-6 lg:px-12 pb-16 lg:pb-32 grid lg:grid-cols-5 gap-10 lg:gap-20">
         {/* Contact info */}
         <div className="lg:col-span-2 space-y-12">
           <div>
@@ -99,7 +99,7 @@ export default function ContactPage() {
                 <MapPin size={16} className="text-[#c9a96e] mt-1 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-[#6b6460]">Based in</p>
-                  <span className="text-[#f0ebe3]">New York & Miami — Available worldwide</span>
+                  <span className="text-[#f0ebe3]">Maryland — DMV Area & Beyond</span>
                 </div>
               </li>
             </ul>
@@ -124,7 +124,7 @@ export default function ContactPage() {
         {/* Form */}
         <div className="lg:col-span-3">
           {sent ? (
-            <div className="border border-[#c9a96e]/30 p-12 text-center">
+            <div className="border border-[#c9a96e]/30 p-6 sm:p-12 text-center">
               <div className="w-12 h-12 rounded-full bg-[#c9a96e]/10 flex items-center justify-center mx-auto mb-6">
                 <Send size={20} className="text-[#c9a96e]" />
               </div>
@@ -265,10 +265,19 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={sending}
-                className="inline-flex items-center gap-3 text-xs tracking-[0.2em] uppercase px-10 py-5 bg-[#c9a96e] text-[#0c0b09] hover:bg-[#f0ebe3] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 text-xs tracking-[0.2em] uppercase px-8 py-4 bg-[#c9a96e] text-[#0c0b09] hover:bg-[#f0ebe3] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {sending ? 'Sending…' : 'Send Enquiry'}
-                <Send size={13} />
+                {sending ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    Sending…
+                  </>
+                ) : (
+                  <>
+                    Send Enquiry
+                    <Send size={13} />
+                  </>
+                )}
               </button>
             </form>
           )}
