@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Settings } from 'lucide-react';
 
 const links = [
   { href: '/', label: 'Home' },
@@ -65,6 +65,15 @@ export default function Navbar() {
               className="text-xs tracking-[0.15em] uppercase px-5 py-2.5 border border-[#c9a96e] text-[#c9a96e] hover:bg-[#c9a96e] hover:text-[#0c0b09] transition-all duration-300"
             >
               Book Now
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/admin"
+              className="text-[#f0ebe3]/60 hover:text-[#c9a96e] transition-colors"
+              aria-label="Admin"
+            >
+              <Settings size={18} />
             </Link>
           </li>
         </ul>
