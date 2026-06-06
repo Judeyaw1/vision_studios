@@ -12,7 +12,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
   const [loggingOut, setLoggingOut] = useState(false);
   const [form, setForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding', password: '' });
   const [uploading, setUploading] = useState<string | null>(null);
-  const [uploadProgress, setUploadProgress] = useState('');
+  const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0 });
   const [copied, setCopied] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeUploadId, setActiveUploadId] = useState<string | null>(null);
@@ -50,29 +50,41 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
   }
 
   async function uploadPhotos(galleryId: string, files: FileList) {
-    setUploading(galleryId);
     const fileArr = Array.from(files);
-    const uploadedUrls: string[] = [];
+    const total = fileArr.length;
+    setUploading(galleryId);
+    setUploadProgress({ done: 0, total });
 
-    for (let i = 0; i < fileArr.length; i++) {
-      const file = fileArr[i];
-      setUploadProgress(`Uploading ${i + 1} of ${fileArr.length}…`);
-      const blob = await upload(`${galleryId}/${Date.now()}-${file.name}`, file, {
-        access: 'public',
-        handleUploadUrl: '/api/admin/upload-token',
+    const uploadedUrls: string[] = [];
+    let done = 0;
+    const BATCH = 5;
+
+    for (let i = 0; i < fileArr.length; i += BATCH) {
+      const batch = fileArr.slice(i, i + BATCH);
+      const results = await Promise.all(
+        batch.map((file) =>
+          upload(`${galleryId}/${Date.now()}-${file.name}`, file, {
+            access: 'public',
+            handleUploadUrl: '/api/admin/upload-token',
+          }).then((blob) => {
+            done++;
+            setUploadProgress({ done, total });
+            return blob.url;
+          })
+        )
+      );
+      uploadedUrls.push(...results);
+
+      // Save each batch to DB immediately so progress is never lost
+      await fetch('/api/admin/save-photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ galleryId, urls: results }),
       });
-      uploadedUrls.push(blob.url);
     }
 
-    setUploadProgress('Saving…');
-    await fetch('/api/admin/save-photos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ galleryId, urls: uploadedUrls }),
-    });
-
     setUploading(null);
-    setUploadProgress('');
+    setUploadProgress({ done: 0, total: 0 });
     setGalleries((prev) =>
       prev.map((g) =>
         g.id === galleryId ? { ...g, photos: [...g.photos, ...uploadedUrls] } : g
@@ -221,16 +233,27 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                     </a>
 
                     {/* Upload */}
-                    <button
-                      onClick={() => { setActiveUploadId(g.id); fileInputRef.current?.click(); }}
-                      disabled={uploading === g.id}
-                      className="inline-flex items-center gap-2 text-xs tracking-[0.15em] uppercase px-4 py-2 border border-[#c9a96e]/40 text-[#c9a96e] hover:bg-[#c9a96e] hover:text-[#0c0b09] transition-colors disabled:opacity-50"
-                    >
-                      {uploading === g.id
-                        ? <><Loader2 size={12} className="animate-spin" />{uploadProgress}</>
-                        : <><Upload size={12} />Upload Photos</>
-                      }
-                    </button>
+                    {uploading === g.id ? (
+                      <div className="flex flex-col gap-1 min-w-35">
+                        <div className="flex items-center gap-2 text-xs text-[#c9a96e]">
+                          <Loader2 size={12} className="animate-spin shrink-0" />
+                          {uploadProgress.done} / {uploadProgress.total} uploaded
+                        </div>
+                        <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#c9a96e] transition-all duration-300"
+                            style={{ width: `${uploadProgress.total ? (uploadProgress.done / uploadProgress.total) * 100 : 0}%` }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { setActiveUploadId(g.id); fileInputRef.current?.click(); }}
+                        className="inline-flex items-center gap-2 text-xs tracking-[0.15em] uppercase px-4 py-2 border border-[#c9a96e]/40 text-[#c9a96e] hover:bg-[#c9a96e] hover:text-[#0c0b09] transition-colors"
+                      >
+                        <Upload size={12} /> Upload Photos
+                      </button>
+                    )}
 
                     {/* Delete */}
                     <button
