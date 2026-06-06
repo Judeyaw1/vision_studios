@@ -76,23 +76,6 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     setUploadSkipped(0);
     setUploadProgress({ done: 0, total });
 
-    async function compress(file: File): Promise<Blob> {
-      try {
-        const bitmap = await createImageBitmap(file);
-        const MAX = 2048;
-        const ratio = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.round(bitmap.width * ratio);
-        canvas.height = Math.round(bitmap.height * ratio);
-        canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-        return await new Promise<Blob>((res, rej) =>
-          canvas.toBlob((b) => (b ? res(b) : rej()), 'image/jpeg', 0.85)
-        );
-      } catch {
-        return file;
-      }
-    }
-
     async function processFile(file: File): Promise<{ url: string; hash: string } | null> {
       const hash = await hashFile(file);
       if (existingHashes.has(hash) || seenThisSession.has(hash)) {
@@ -101,15 +84,13 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
       }
       seenThisSession.add(hash);
 
-      const compressed = await compress(file);
-
       const res = await fetch(
         `/api/admin/photo-upload?galleryId=${galleryId}&filename=${encodeURIComponent(file.name)}`,
-        { method: 'POST', body: compressed, headers: { 'Content-Type': 'image/jpeg' } }
+        { method: 'POST', body: file, headers: { 'Content-Type': file.type || 'image/jpeg' } }
       );
       if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: res.statusText }));
-        throw new Error(err.error || 'Upload failed');
+        const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        throw new Error(data.error ?? 'Upload failed');
       }
       const { url } = await res.json();
       return { url, hash };
