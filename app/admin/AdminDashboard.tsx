@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Upload, Copy, Check, Loader2, ExternalLink, LogOut } from 'lucide-react';
+import { Plus, Trash2, Upload, Copy, Check, Loader2, ExternalLink, LogOut, ChevronDown, ChevronUp, X } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import type { Gallery } from '@/lib/galleries';
 
@@ -14,6 +14,8 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0 });
   const [uploadError, setUploadError] = useState('');
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [deletingPhoto, setDeletingPhoto] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeUploadId, setActiveUploadId] = useState<string | null>(null);
@@ -116,6 +118,23 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
       setUploading(null);
       setUploadProgress({ done: 0, total: 0 });
     }
+  }
+
+  async function deletePhoto(galleryId: string, photoUrl: string) {
+    setDeletingPhoto(photoUrl);
+    await fetch('/api/admin/delete-photo', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ galleryId, photoUrl }),
+    });
+    setGalleries((prev) =>
+      prev.map((g) =>
+        g.id === galleryId
+          ? { ...g, photos: g.photos.filter((u) => u !== photoUrl) }
+          : g
+      )
+    );
+    setDeletingPhoto(null);
   }
 
   function copyLink(id: string) {
@@ -283,7 +302,16 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                       </button>
                     )}
 
-                    {/* Delete */}
+                    {/* Expand photos */}
+                    <button
+                      onClick={() => setExpanded(expanded === g.id ? null : g.id)}
+                      className="inline-flex items-center gap-1 text-xs tracking-[0.15em] uppercase px-4 py-2 border border-white/15 text-[#6b6460] hover:text-[#f0ebe3] hover:border-white/30 transition-colors"
+                    >
+                      {expanded === g.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                      Photos
+                    </button>
+
+                    {/* Delete gallery */}
                     <button
                       onClick={() => deleteGallery(g.id)}
                       className="p-2 text-[#6b6460] hover:text-red-400 transition-colors"
@@ -293,6 +321,39 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                     </button>
                   </div>
                 </div>
+
+                {/* Photo grid */}
+                {expanded === g.id && (
+                  <div className="mt-6 pt-6 border-t border-white/8">
+                    {g.photos.length === 0 ? (
+                      <p className="text-[#6b6460] text-sm">No photos uploaded yet.</p>
+                    ) : (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+                        {g.photos.map((url) => (
+                          <div key={url} className="relative group aspect-square overflow-hidden bg-white/5">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={url}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              onClick={() => deletePhoto(g.id, url)}
+                              disabled={deletingPhoto === url}
+                              className="absolute inset-0 bg-[#0c0b09]/0 group-hover:bg-[#0c0b09]/60 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100"
+                              aria-label="Delete photo"
+                            >
+                              {deletingPhoto === url
+                                ? <Loader2 size={18} className="animate-spin text-white" />
+                                : <X size={18} className="text-red-400" />
+                              }
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
