@@ -11,6 +11,7 @@ const links = [
   { href: '/portfolio', label: 'Portfolio' },
   { href: '/about', label: 'About' },
   { href: '/services', label: 'Services' },
+  { href: '/clients', label: 'My Gallery' },
 ];
 
 export default function Navbar() {
