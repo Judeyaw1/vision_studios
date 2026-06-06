@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Upload, Copy, Check, Loader2, ExternalLink, LogOut } from 'lucide-react';
+import { upload } from '@vercel/blob/client';
 import type { Gallery } from '@/lib/galleries';
 
 export default function AdminDashboard({ galleries: initial }: { galleries: Gallery[] }) {
@@ -50,24 +51,33 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
 
   async function uploadPhotos(galleryId: string, files: FileList) {
     setUploading(galleryId);
-    setUploadProgress(`Uploading ${files.length} photo${files.length > 1 ? 's' : ''}…`);
+    const fileArr = Array.from(files);
+    const uploadedUrls: string[] = [];
 
-    const formData = new FormData();
-    formData.append('galleryId', galleryId);
-    for (const f of Array.from(files)) formData.append('photos', f);
+    for (let i = 0; i < fileArr.length; i++) {
+      const file = fileArr[i];
+      setUploadProgress(`Uploading ${i + 1} of ${fileArr.length}…`);
+      const blob = await upload(`${galleryId}/${Date.now()}-${file.name}`, file, {
+        access: 'public',
+        handleUploadUrl: '/api/admin/upload-token',
+      });
+      uploadedUrls.push(blob.url);
+    }
 
-    const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
-    const data = await res.json();
+    setUploadProgress('Saving…');
+    await fetch('/api/admin/save-photos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ galleryId, urls: uploadedUrls }),
+    });
+
     setUploading(null);
     setUploadProgress('');
-
-    if (res.ok) {
-      setGalleries((prev) =>
-        prev.map((g) =>
-          g.id === galleryId ? { ...g, photos: [...g.photos, ...data.uploaded] } : g
-        )
-      );
-    }
+    setGalleries((prev) =>
+      prev.map((g) =>
+        g.id === galleryId ? { ...g, photos: [...g.photos, ...uploadedUrls] } : g
+      )
+    );
     router.refresh();
   }
 
