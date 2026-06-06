@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { getGallery, saveGallery } from '@/lib/galleries';
+import { makeAdminToken } from '../login/route';
 
 function isAdminAuthed(req: NextRequest) {
-  return req.cookies.get('admin_session')?.value === process.env.ADMIN_PASSWORD;
+  return req.cookies.get('admin_session')?.value === makeAdminToken();
 }
 
 export async function POST(req: NextRequest) {

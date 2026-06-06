@@ -2,12 +2,13 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Upload, Copy, Check, Loader2, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, Upload, Copy, Check, Loader2, ExternalLink, LogOut } from 'lucide-react';
 import type { Gallery } from '@/lib/galleries';
 
 export default function AdminDashboard({ galleries: initial }: { galleries: Gallery[] }) {
   const [galleries, setGalleries] = useState(initial);
   const [creating, setCreating] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [form, setForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding', password: '' });
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState('');
@@ -15,6 +16,12 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeUploadId, setActiveUploadId] = useState<string | null>(null);
   const router = useRouter();
+
+  async function logout() {
+    setLoggingOut(true);
+    await fetch('/api/admin/logout', { method: 'POST' });
+    router.refresh();
+  }
 
   async function createGallery(e: React.FormEvent) {
     e.preventDefault();
@@ -79,12 +86,23 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
             <p className="text-xs tracking-[0.3em] uppercase text-[#c9a96e] mb-2">Vision Studios</p>
             <h1 className="font-serif text-4xl text-[#f0ebe3]">Client Galleries</h1>
           </div>
-          <button
-            onClick={() => setCreating((v) => !v)}
-            className="inline-flex items-center gap-2 text-xs tracking-[0.2em] uppercase px-5 py-3 bg-[#c9a96e] text-[#0c0b09] hover:bg-[#f0ebe3] transition-colors"
-          >
-            <Plus size={14} /> New Gallery
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setCreating((v) => !v)}
+              className="inline-flex items-center gap-2 text-xs tracking-[0.2em] uppercase px-5 py-3 bg-[#c9a96e] text-[#0c0b09] hover:bg-[#f0ebe3] transition-colors"
+            >
+              <Plus size={14} /> New Gallery
+            </button>
+            <button
+              onClick={logout}
+              disabled={loggingOut}
+              className="inline-flex items-center gap-2 text-xs tracking-[0.2em] uppercase px-4 py-3 border border-white/15 text-[#6b6460] hover:text-[#f0ebe3] hover:border-white/30 transition-colors"
+              aria-label="Log out"
+            >
+              {loggingOut ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />}
+              Log Out
+            </button>
+          </div>
         </div>
 
         {/* Create form */}
@@ -108,7 +126,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                   type="date"
                   value={form.eventDate}
                   onChange={(e) => setForm((f) => ({ ...f, eventDate: e.target.value }))}
-                  className="w-full bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] focus:border-[#c9a96e] focus:outline-none text-sm [color-scheme:dark]"
+                  className="w-full bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] focus:border-[#c9a96e] focus:outline-none text-sm scheme-dark"
                 />
               </div>
               <div>

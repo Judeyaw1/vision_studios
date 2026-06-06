@@ -1,4 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
+
+export function makeAdminToken() {
+  return crypto
+    .createHmac('sha256', process.env.GALLERY_SECRET ?? 'dev-secret')
+    .update('admin-' + process.env.ADMIN_PASSWORD)
+    .digest('hex');
+}
 
 export async function POST(req: NextRequest) {
   const { password } = await req.json();
@@ -8,10 +16,10 @@ export async function POST(req: NextRequest) {
   }
 
   const res = NextResponse.json({ ok: true });
-  res.cookies.set('admin_session', password, {
+  // Session cookie — no maxAge means it expires when the browser closes
+  res.cookies.set('admin_session', makeAdminToken(), {
     httpOnly: true,
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 8, // 8 hours
+    sameSite: 'strict',
     path: '/',
   });
   return res;
