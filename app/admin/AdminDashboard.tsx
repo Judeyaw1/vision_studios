@@ -68,19 +68,26 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
         const batch = fileArr.slice(i, i + BATCH);
         const results = await Promise.all(
           batch.map(async (file) => {
-            // Compress to max 4MB to fit Vercel's body limit
-            const compressed = await imageCompression(file, {
-              maxSizeMB: 4,
-              maxWidthOrHeight: 4096,
-              useWebWorker: true,
-            });
+            // Compress if over 4MB — fall back to original if compression fails
+            let toUpload: File | Blob = file;
+            if (file.size > 4 * 1024 * 1024) {
+              try {
+                toUpload = await imageCompression(file, {
+                  maxSizeMB: 4,
+                  maxWidthOrHeight: 4096,
+                  useWebWorker: false,
+                });
+              } catch {
+                toUpload = file; // use original if compression fails
+              }
+            }
 
             const res = await fetch(
               `/api/admin/photo-upload?galleryId=${galleryId}&filename=${encodeURIComponent(file.name)}`,
               {
                 method: 'POST',
-                body: compressed,
-                headers: { 'Content-Type': compressed.type || file.type },
+                body: toUpload,
+                headers: { 'Content-Type': file.type || 'image/jpeg' },
               }
             );
 
