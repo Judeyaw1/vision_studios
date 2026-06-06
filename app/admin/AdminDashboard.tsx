@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Upload, Copy, Check, Loader2, ExternalLink, LogOut } from 'lucide-react';
-import { upload } from '@vercel/blob/client';
+import imageCompression from 'browser-image-compression';
 import type { Gallery } from '@/lib/galleries';
 
 export default function AdminDashboard({ galleries: initial }: { galleries: Gallery[] }) {
@@ -65,18 +65,35 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
       for (let i = 0; i < fileArr.length; i += BATCH) {
         const batch = fileArr.slice(i, i + BATCH);
         const results = await Promise.all(
-          batch.map((file) =>
-            upload(`galleries/${galleryId}/${Date.now()}-${file.name}`, file, {
-              access: 'public',
-              handleUploadUrl: '/api/admin/upload-token',
-              multipart: true,
-            }).then((blob) => {
-              done++;
-              setUploadProgress({ done, total });
-              return blob.url;
-            })
-          )
+          batch.map(async (file) => {
+            // Compress to max 4MB to fit Vercel's body limit
+            const compressed = await imageCompression(file, {
+              maxSizeMB: 4,
+              maxWidthOrHeight: 4096,
+              useWebWorker: true,
+            });
+
+            const res = await fetch(
+              `/api/admin/photo-upload?galleryId=${galleryId}&filename=${encodeURIComponent(file.name)}`,
+              {
+                method: 'POST',
+                body: compressed,
+                headers: { 'Content-Type': compressed.type || file.type },
+              }
+            );
+
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({ error: res.statusText }));
+              throw new Error(err.error || 'Upload failed');
+            }
+
+            const { url } = await res.json();
+            done++;
+            setUploadProgress({ done, total });
+            return url as string;
+          })
         );
+
         uploadedUrls.push(...results);
 
         await fetch('/api/admin/save-photos', {
@@ -221,7 +238,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                     <p className="text-[#6b6460]/50 text-xs mt-1 font-mono">/clients/{g.id}</p>
                   </div>
 
-                  {uploadError && uploading !== g.id && (
+                  {uploadError && (
                     <p className="text-red-400 text-xs mt-1">{uploadError}</p>
                   )}
                   <div className="flex items-center gap-2 flex-wrap">
