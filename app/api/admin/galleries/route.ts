@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
     eventType: eventType ?? 'Session',
     passwordHash: hashPassword(password),
     photos: [],
+    photoHashes: [],
     createdAt: new Date().toISOString(),
   };
 

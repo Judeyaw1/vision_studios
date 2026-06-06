@@ -14,6 +14,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0 });
   const [uploadError, setUploadError] = useState('');
+  const [uploadSkipped, setUploadSkipped] = useState(0);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [deletingPhoto, setDeletingPhoto] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
@@ -52,22 +53,48 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     setGalleries((prev) => prev.filter((g) => g.id !== id));
   }
 
+  async function hashFile(file: File): Promise<string> {
+    const buffer = await file.arrayBuffer();
+    const digest = await crypto.subtle.digest('SHA-256', buffer);
+    return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
   async function uploadPhotos(galleryId: string, files: FileList) {
+    const gallery = galleries.find((g) => g.id === galleryId);
+    const existingHashes = new Set(gallery?.photoHashes ?? []);
+
     const fileArr = Array.from(files);
-    const total = fileArr.length;
     setUploading(galleryId);
-    setUploadProgress({ done: 0, total });
     setUploadError('');
+    setUploadSkipped(0);
+
+    // Filter duplicates by hash before uploading
+    setUploadProgress({ done: 0, total: fileArr.length });
+    const withHashes = await Promise.all(fileArr.map(async (f) => ({ file: f, hash: await hashFile(f) })));
+    const unique = withHashes.filter(({ hash }) => !existingHashes.has(hash));
+    const skipped = fileArr.length - unique.length;
+    if (skipped > 0) setUploadSkipped(skipped);
+
+    const total = unique.length;
+    setUploadProgress({ done: 0, total: total || 1 });
 
     const uploadedUrls: string[] = [];
     let done = 0;
     const BATCH = 5;
 
     try {
-      for (let i = 0; i < fileArr.length; i += BATCH) {
-        const batch = fileArr.slice(i, i + BATCH);
+      if (unique.length === 0) {
+        setUploading(null);
+        setUploadProgress({ done: 0, total: 0 });
+        return;
+      }
+
+      for (let i = 0; i < unique.length; i += BATCH) {
+        const batch = unique.slice(i, i + BATCH);
+        const batchHashes: string[] = [];
         const results = await Promise.all(
-          batch.map(async (file) => {
+          batch.map(async ({ file, hash }) => {
+            batchHashes.push(hash);
             // Compress if over 4MB — fall back to original if compression fails
             let toUpload: File | Blob = file;
             if (file.size > 4 * 1024 * 1024) {
@@ -108,7 +135,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
         await fetch('/api/admin/save-photos', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ galleryId, urls: results }),
+          body: JSON.stringify({ galleryId, urls: results, hashes: batchHashes }),
         });
       }
 
@@ -292,6 +319,9 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                         <div className="flex items-center gap-2 text-xs text-[#c9a96e]">
                           <Loader2 size={12} className="animate-spin shrink-0" />
                           {uploadProgress.done} / {uploadProgress.total} uploaded
+                          {uploadSkipped > 0 && (
+                            <span className="text-[#6b6460]">· {uploadSkipped} duplicate{uploadSkipped > 1 ? 's' : ''} skipped</span>
+                          )}
                         </div>
                         <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
                           <div

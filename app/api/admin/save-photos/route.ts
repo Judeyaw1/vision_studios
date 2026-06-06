@@ -11,7 +11,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { galleryId, urls } = await req.json() as { galleryId: string; urls: string[] };
+  const { galleryId, urls, hashes } = await req.json() as {
+    galleryId: string;
+    urls: string[];
+    hashes: string[];
+  };
 
   if (!galleryId || !urls?.length) {
     return NextResponse.json({ error: 'Missing galleryId or urls' }, { status: 400 });
@@ -21,6 +25,7 @@ export async function POST(req: NextRequest) {
   if (!gallery) return NextResponse.json({ error: 'Gallery not found' }, { status: 404 });
 
   gallery.photos = [...gallery.photos, ...urls];
+  gallery.photoHashes = [...(gallery.photoHashes ?? []), ...(hashes ?? [])];
   if (!gallery.coverPhoto) gallery.coverPhoto = urls[0];
   await saveGallery(gallery);
 

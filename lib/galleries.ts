@@ -8,6 +8,7 @@ export type Gallery = {
   eventType: string;
   passwordHash: string;
   photos: string[];
+  photoHashes: string[];
   coverPhoto?: string;
   createdAt: string;
 };
@@ -20,6 +21,7 @@ function rowToGallery(row: Record<string, unknown>): Gallery {
     eventType: (row.event_type as string) ?? 'Session',
     passwordHash: row.password_hash as string,
     photos: (row.photos as string[]) ?? [],
+    photoHashes: (row.photo_hashes as string[]) ?? [],
     coverPhoto: (row.cover_photo as string) ?? '',
     createdAt: (row.created_at as Date).toISOString(),
   };
@@ -37,7 +39,7 @@ export async function getGallery(id: string): Promise<Gallery | null> {
 
 export async function saveGallery(gallery: Gallery): Promise<void> {
   await sql`
-    INSERT INTO galleries (id, client_name, event_date, event_type, password_hash, photos, cover_photo)
+    INSERT INTO galleries (id, client_name, event_date, event_type, password_hash, photos, photo_hashes, cover_photo)
     VALUES (
       ${gallery.id},
       ${gallery.clientName},
@@ -45,15 +47,17 @@ export async function saveGallery(gallery: Gallery): Promise<void> {
       ${gallery.eventType},
       ${gallery.passwordHash},
       ${JSON.stringify(gallery.photos)},
+      ${JSON.stringify(gallery.photoHashes ?? [])},
       ${gallery.coverPhoto ?? ''}
     )
     ON CONFLICT (id) DO UPDATE SET
-      client_name  = EXCLUDED.client_name,
-      event_date   = EXCLUDED.event_date,
-      event_type   = EXCLUDED.event_type,
+      client_name   = EXCLUDED.client_name,
+      event_date    = EXCLUDED.event_date,
+      event_type    = EXCLUDED.event_type,
       password_hash = EXCLUDED.password_hash,
-      photos       = EXCLUDED.photos,
-      cover_photo  = EXCLUDED.cover_photo
+      photos        = EXCLUDED.photos,
+      photo_hashes  = EXCLUDED.photo_hashes,
+      cover_photo   = EXCLUDED.cover_photo
   `;
 }
 

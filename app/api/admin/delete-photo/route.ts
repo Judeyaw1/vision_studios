@@ -21,8 +21,12 @@ export async function DELETE(req: NextRequest) {
   const gallery = await getGallery(galleryId);
   if (!gallery) return NextResponse.json({ error: 'Gallery not found' }, { status: 404 });
 
-  // Remove from DB
+  // Remove URL and its hash from DB
+  const idx = gallery.photos.indexOf(photoUrl);
   gallery.photos = gallery.photos.filter((url) => url !== photoUrl);
+  if (idx >= 0 && gallery.photoHashes?.length) {
+    gallery.photoHashes = gallery.photoHashes.filter((_, i) => i !== idx);
+  }
   if (gallery.coverPhoto === photoUrl) {
     gallery.coverPhoto = gallery.photos[0] ?? '';
   }
