@@ -4,7 +4,7 @@ import { getGallery, verifyPassword, makeSessionToken } from '@/lib/galleries';
 export async function POST(req: NextRequest) {
   const { galleryId, password } = await req.json();
 
-  const gallery = getGallery(galleryId);
+  const gallery = await getGallery(galleryId);
   if (!gallery) {
     return NextResponse.json({ error: 'Gallery not found' }, { status: 404 });
   }
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   res.cookies.set(`gallery_${galleryId}`, token, {
     httpOnly: true,
     sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: 60 * 60 * 24 * 7,
     path: '/',
   });
   return res;

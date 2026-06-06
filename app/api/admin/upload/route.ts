@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing galleryId or photos' }, { status: 400 });
   }
 
-  const gallery = getGallery(galleryId);
+  const gallery = await getGallery(galleryId);
   if (!gallery) return NextResponse.json({ error: 'Gallery not found' }, { status: 404 });
 
   const uploaded: string[] = [];
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
   gallery.photos = [...gallery.photos, ...uploaded];
   if (!gallery.coverPhoto && uploaded.length) gallery.coverPhoto = uploaded[0];
-  saveGallery(gallery);
+  await saveGallery(gallery);
 
   return NextResponse.json({ uploaded, total: gallery.photos.length });
 }

@@ -11,6 +11,6 @@ export default async function AdminPage() {
 
   if (!isAuthed) return <AdminLogin />;
 
-  const galleries = getGalleries();
+  const galleries = await getGalleries();
   return <AdminDashboard galleries={galleries} />;
 }

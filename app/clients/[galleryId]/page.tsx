@@ -6,7 +6,7 @@ import GalleryView from './GalleryView';
 
 export default async function GalleryPage({ params }: { params: Promise<{ galleryId: string }> }) {
   const { galleryId } = await params;
-  const gallery = getGallery(galleryId);
+  const gallery = await getGallery(galleryId);
   if (!gallery) notFound();
 
   const cookieStore = await cookies();

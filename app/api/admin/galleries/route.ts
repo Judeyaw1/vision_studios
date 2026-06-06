@@ -8,15 +8,13 @@ function isAdminAuthed(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   if (!isAdminAuthed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  return NextResponse.json(getGalleries());
+  return NextResponse.json(await getGalleries());
 }
 
 export async function POST(req: NextRequest) {
   if (!isAdminAuthed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const body = await req.json();
-  const { clientName, eventDate, eventType, password } = body;
-
+  const { clientName, eventDate, eventType, password } = await req.json();
   if (!clientName || !password) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
@@ -34,13 +32,13 @@ export async function POST(req: NextRequest) {
     createdAt: new Date().toISOString(),
   };
 
-  saveGallery(gallery);
+  await saveGallery(gallery);
   return NextResponse.json(gallery, { status: 201 });
 }
 
 export async function DELETE(req: NextRequest) {
   if (!isAdminAuthed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { id } = await req.json();
-  deleteGallery(id);
+  await deleteGallery(id);
   return NextResponse.json({ ok: true });
 }
