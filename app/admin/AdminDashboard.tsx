@@ -52,19 +52,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     setGalleries((prev) => prev.filter((g) => g.id !== id));
   }
 
-  async function hashFile(file: File): Promise<string> {
-    // Hash only first 1MB for speed — good enough for duplicate detection
-    const slice = file.slice(0, 1024 * 1024);
-    const buffer = await slice.arrayBuffer();
-    const digest = await crypto.subtle.digest('SHA-256', buffer);
-    return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
-  }
-
   async function uploadPhotos(galleryId: string, files: FileList) {
-    const gallery = galleries.find((g) => g.id === galleryId);
-    const existingHashes = new Set(gallery?.photoHashes ?? []);
-    const seenThisSession = new Set<string>();
-
     const fileArr = Array.from(files);
     const total = fileArr.length;
     let done = 0;
@@ -76,14 +64,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     setUploadSkipped(0);
     setUploadProgress({ done: 0, total });
 
-    async function processFile(file: File): Promise<{ url: string; hash: string } | null> {
-      const hash = await hashFile(file);
-      if (existingHashes.has(hash) || seenThisSession.has(hash)) {
-        seenThisSession.add(hash);
-        return null;
-      }
-      seenThisSession.add(hash);
-
+    async function processFile(file: File): Promise<string | null> {
       const res = await fetch(
         `/api/admin/photo-upload?galleryId=${galleryId}&filename=${encodeURIComponent(file.name)}`,
         { method: 'POST', body: file, headers: { 'Content-Type': file.type || 'image/jpeg' } }
@@ -93,7 +74,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
         throw new Error(data.error ?? 'Upload failed');
       }
       const { url } = await res.json();
-      return { url, hash };
+      return url as string;
     }
 
     try {
@@ -104,16 +85,17 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
         const settled = await Promise.allSettled(batch.map((f) => processFile(f)));
 
         const batchUrls: string[] = [];
-        const batchHashes: string[] = [];
 
         for (const result of settled) {
           done++;
           if (result.status === 'fulfilled' && result.value) {
-            batchUrls.push(result.value.url);
-            batchHashes.push(result.value.hash);
+            batchUrls.push(result.value);
           } else {
             skipped++;
             setUploadSkipped(skipped);
+            if (result.status === 'rejected') {
+              setUploadError(result.reason?.message ?? 'Upload failed');
+            }
           }
           setUploadProgress({ done, total });
         }
@@ -122,7 +104,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
           await fetch('/api/admin/save-photos', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ galleryId, urls: batchUrls, hashes: batchHashes }),
+            body: JSON.stringify({ galleryId, urls: batchUrls, hashes: [] }),
           });
           setGalleries((prev) =>
             prev.map((g) =>
