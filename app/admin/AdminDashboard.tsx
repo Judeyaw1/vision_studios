@@ -13,6 +13,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
   const [form, setForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding', password: '' });
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0 });
+  const [uploadError, setUploadError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeUploadId, setActiveUploadId] = useState<string | null>(null);
@@ -54,43 +55,49 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     const total = fileArr.length;
     setUploading(galleryId);
     setUploadProgress({ done: 0, total });
+    setUploadError('');
 
     const uploadedUrls: string[] = [];
     let done = 0;
     const BATCH = 5;
 
-    for (let i = 0; i < fileArr.length; i += BATCH) {
-      const batch = fileArr.slice(i, i + BATCH);
-      const results = await Promise.all(
-        batch.map((file) =>
-          upload(`${galleryId}/${Date.now()}-${file.name}`, file, {
-            access: 'public',
-            handleUploadUrl: '/api/admin/upload-token',
-          }).then((blob) => {
-            done++;
-            setUploadProgress({ done, total });
-            return blob.url;
-          })
+    try {
+      for (let i = 0; i < fileArr.length; i += BATCH) {
+        const batch = fileArr.slice(i, i + BATCH);
+        const results = await Promise.all(
+          batch.map((file) =>
+            upload(`galleries/${galleryId}/${Date.now()}-${file.name}`, file, {
+              access: 'public',
+              handleUploadUrl: '/api/admin/upload-token',
+            }).then((blob) => {
+              done++;
+              setUploadProgress({ done, total });
+              return blob.url;
+            })
+          )
+        );
+        uploadedUrls.push(...results);
+
+        await fetch('/api/admin/save-photos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ galleryId, urls: results }),
+        });
+      }
+
+      setGalleries((prev) =>
+        prev.map((g) =>
+          g.id === galleryId ? { ...g, photos: [...g.photos, ...uploadedUrls] } : g
         )
       );
-      uploadedUrls.push(...results);
-
-      // Save each batch to DB immediately so progress is never lost
-      await fetch('/api/admin/save-photos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ galleryId, urls: results }),
-      });
+      router.refresh();
+    } catch (err) {
+      console.error('Upload failed:', err);
+      setUploadError(`Upload failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setUploading(null);
+      setUploadProgress({ done: 0, total: 0 });
     }
-
-    setUploading(null);
-    setUploadProgress({ done: 0, total: 0 });
-    setGalleries((prev) =>
-      prev.map((g) =>
-        g.id === galleryId ? { ...g, photos: [...g.photos, ...uploadedUrls] } : g
-      )
-    );
-    router.refresh();
   }
 
   function copyLink(id: string) {
@@ -213,6 +220,9 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                     <p className="text-[#6b6460]/50 text-xs mt-1 font-mono">/clients/{g.id}</p>
                   </div>
 
+                  {uploadError && uploading !== g.id && (
+                    <p className="text-red-400 text-xs mt-1">{uploadError}</p>
+                  )}
                   <div className="flex items-center gap-2 flex-wrap">
                     {/* Copy link */}
                     <button

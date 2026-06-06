@@ -13,18 +13,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   const body = (await req.json()) as HandleUploadBody;
 
-  const jsonResponse = await handleUpload({
-    body,
-    request: req,
-    onBeforeGenerateToken: async (pathname) => ({
-      pathname: `galleries/${pathname}`,
-      allowedContentTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
-      maximumSizeInBytes: 50 * 1024 * 1024, // 50MB per file
-    }),
-    onUploadCompleted: async () => {
-      // URL is saved separately via /api/admin/save-photos
-    },
-  });
-
-  return NextResponse.json(jsonResponse);
+  try {
+    const jsonResponse = await handleUpload({
+      body,
+      request: req,
+      onBeforeGenerateToken: async () => ({
+        allowedContentTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'],
+        maximumSizeInBytes: 50 * 1024 * 1024,
+      }),
+      onUploadCompleted: async () => {},
+    });
+    return NextResponse.json(jsonResponse);
+  } catch (err) {
+    console.error('upload-token error:', err);
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
 }
