@@ -70,101 +70,81 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     const total = fileArr.length;
     let done = 0;
     let skipped = 0;
+    const BATCH = 5;
 
     setUploading(galleryId);
     setUploadError('');
     setUploadSkipped(0);
     setUploadProgress({ done: 0, total });
 
-    const uploadedUrls: string[] = [];
-    const uploadedHashes: string[] = [];
+    async function processFile(file: File): Promise<{ url: string; hash: string } | null> {
+      const hash = await hashFile(file);
+      if (existingHashes.has(hash) || seenThisSession.has(hash)) {
+        seenThisSession.add(hash);
+        return null; // duplicate
+      }
+      seenThisSession.add(hash);
+
+      let toUpload: File | Blob = file;
+      try {
+        toUpload = await imageCompression(file, {
+          maxSizeMB: 3.5,
+          maxWidthOrHeight: 4096,
+          useWebWorker: false,
+          fileType: 'image/jpeg',
+        });
+      } catch {
+        if (file.size > 4 * 1024 * 1024) return null; // too big, skip
+      }
+
+      const res = await fetch(
+        `/api/admin/photo-upload?galleryId=${galleryId}&filename=${encodeURIComponent(file.name)}`,
+        { method: 'POST', body: toUpload, headers: { 'Content-Type': 'image/jpeg' } }
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        throw new Error(err.error || 'Upload failed');
+      }
+      const { url } = await res.json();
+      return { url, hash };
+    }
 
     try {
-      // Process files one at a time to avoid loading everything into memory
-      for (const file of fileArr) {
-        const hash = await hashFile(file);
+      for (let i = 0; i < fileArr.length; i += BATCH) {
+        const batch = fileArr.slice(i, i + BATCH);
 
-        if (existingHashes.has(hash) || seenThisSession.has(hash)) {
-          skipped++;
+        // Upload batch in parallel
+        const settled = await Promise.allSettled(batch.map((f) => processFile(f)));
+
+        const batchUrls: string[] = [];
+        const batchHashes: string[] = [];
+
+        for (const result of settled) {
           done++;
-          setUploadSkipped(skipped);
-          setUploadProgress({ done, total });
-          continue;
-        }
-        seenThisSession.add(hash);
-
-        let toUpload: File | Blob = file;
-        try {
-          toUpload = await imageCompression(file, {
-            maxSizeMB: 3.5,
-            maxWidthOrHeight: 4096,
-            useWebWorker: false,
-            fileType: 'image/jpeg',
-          });
-        } catch {
-          // If compression fails and file is over limit, skip with error
-          if (file.size > 4 * 1024 * 1024) {
-            done++;
+          if (result.status === 'fulfilled' && result.value) {
+            batchUrls.push(result.value.url);
+            batchHashes.push(result.value.hash);
+          } else {
             skipped++;
             setUploadSkipped(skipped);
-            setUploadProgress({ done, total });
-            continue;
           }
+          setUploadProgress({ done, total });
         }
 
-        const res = await fetch(
-          `/api/admin/photo-upload?galleryId=${galleryId}&filename=${encodeURIComponent(file.name)}`,
-          {
-            method: 'POST',
-            body: toUpload,
-            headers: { 'Content-Type': file.type || 'image/jpeg' },
-          }
-        );
-
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({ error: res.statusText }));
-          throw new Error(err.error || 'Upload failed');
-        }
-
-        const { url } = await res.json();
-        uploadedUrls.push(url);
-        uploadedHashes.push(hash);
-        done++;
-        setUploadProgress({ done, total });
-
-        // Save to DB every 5 uploads
-        if (uploadedUrls.length % 5 === 0) {
+        if (batchUrls.length > 0) {
           await fetch('/api/admin/save-photos', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              galleryId,
-              urls: uploadedUrls.slice(-5),
-              hashes: uploadedHashes.slice(-5),
-            }),
+            body: JSON.stringify({ galleryId, urls: batchUrls, hashes: batchHashes }),
           });
+          setGalleries((prev) =>
+            prev.map((g) =>
+              g.id === galleryId ? { ...g, photos: [...g.photos, ...batchUrls] } : g
+            )
+          );
         }
       }
 
-      // Save any remaining
-      const remaining = uploadedUrls.length % 5;
-      if (remaining > 0) {
-        await fetch('/api/admin/save-photos', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            galleryId,
-            urls: uploadedUrls.slice(-remaining),
-            hashes: uploadedHashes.slice(-remaining),
-          }),
-        });
-      }
-
-      setGalleries((prev) =>
-        prev.map((g) =>
-          g.id === galleryId ? { ...g, photos: [...g.photos, ...uploadedUrls] } : g
-        )
-      );
       router.refresh();
     } catch (err) {
       console.error('Upload failed:', err);
