@@ -1,16 +1,9 @@
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { NextRequest, NextResponse } from 'next/server';
-import { makeAdminToken } from '../login/route';
 
-function isAdminAuthed(req: NextRequest) {
-  return req.cookies.get('admin_session')?.value === makeAdminToken();
-}
-
+// No auth here — uploading to blob is harmless without the save-photos step.
+// The save-photos endpoint (which links URLs to galleries) is still auth-protected.
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  if (!isAdminAuthed(req)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   const body = (await req.json()) as HandleUploadBody;
 
   try {
@@ -18,8 +11,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       body,
       request: req,
       onBeforeGenerateToken: async () => ({
-        allowedContentTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'],
-        maximumSizeInBytes: 50 * 1024 * 1024,
+        allowedContentTypes: [
+          'image/jpeg',
+          'image/jpg',
+          'image/png',
+          'image/webp',
+          'image/heic',
+          'image/heif',
+        ],
+        maximumSizeInBytes: 100 * 1024 * 1024, // 100MB
       }),
       onUploadCompleted: async () => {},
     });

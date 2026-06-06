@@ -69,6 +69,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
             upload(`galleries/${galleryId}/${Date.now()}-${file.name}`, file, {
               access: 'public',
               handleUploadUrl: '/api/admin/upload-token',
+              multipart: true,
             }).then((blob) => {
               done++;
               setUploadProgress({ done, total });
