@@ -29,7 +29,8 @@ export default function Footer() {
               ['/portfolio', 'Portfolio'],
               ['/about', 'About'],
               ['/services', 'Services'],
-              ['/contact', 'Contact'],
+              ['/contact', 'Book a Session'],
+              ['/clients', 'Client Gallery'],
             ].map(([href, label]) => (
               <li key={href}>
                 <Link href={href} className="text-sm text-[#6b6460] hover:text-[#f0ebe3] transition-colors">
