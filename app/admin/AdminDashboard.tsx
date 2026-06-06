@@ -94,15 +94,21 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
         seenThisSession.add(hash);
 
         let toUpload: File | Blob = file;
-        if (file.size > 4 * 1024 * 1024) {
-          try {
-            toUpload = await imageCompression(file, {
-              maxSizeMB: 4,
-              maxWidthOrHeight: 4096,
-              useWebWorker: false,
-            });
-          } catch {
-            toUpload = file;
+        try {
+          toUpload = await imageCompression(file, {
+            maxSizeMB: 3.5,
+            maxWidthOrHeight: 4096,
+            useWebWorker: false,
+            fileType: 'image/jpeg',
+          });
+        } catch {
+          // If compression fails and file is over limit, skip with error
+          if (file.size > 4 * 1024 * 1024) {
+            done++;
+            skipped++;
+            setUploadSkipped(skipped);
+            setUploadProgress({ done, total });
+            continue;
           }
         }
 
