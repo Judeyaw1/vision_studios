@@ -1,4 +1,4 @@
-import { put, list } from '@vercel/blob';
+import sql from './db';
 import crypto from 'crypto';
 
 export type Gallery = {
@@ -12,54 +12,60 @@ export type Gallery = {
   createdAt: string;
 };
 
-const BLOB_PATH = 'vision-studios-galleries.json';
-
-async function readData(): Promise<{ galleries: Gallery[] }> {
-  try {
-    const { blobs } = await list({ prefix: BLOB_PATH, limit: 1 });
-    if (!blobs.length) return { galleries: [] };
-    const res = await fetch(blobs[0].url, { cache: 'no-store' });
-    return await res.json();
-  } catch {
-    return { galleries: [] };
-  }
-}
-
-async function writeData(data: { galleries: Gallery[] }) {
-  await put(BLOB_PATH, JSON.stringify(data, null, 2), {
-    access: 'public',
-    addRandomSuffix: false,
-  });
+function rowToGallery(row: Record<string, unknown>): Gallery {
+  return {
+    id: row.id as string,
+    clientName: row.client_name as string,
+    eventDate: (row.event_date as string) ?? '',
+    eventType: (row.event_type as string) ?? 'Session',
+    passwordHash: row.password_hash as string,
+    photos: (row.photos as string[]) ?? [],
+    coverPhoto: (row.cover_photo as string) ?? '',
+    createdAt: (row.created_at as Date).toISOString(),
+  };
 }
 
 export async function getGalleries(): Promise<Gallery[]> {
-  return (await readData()).galleries;
+  const rows = await sql`SELECT * FROM galleries ORDER BY created_at DESC`;
+  return rows.map(rowToGallery);
 }
 
 export async function getGallery(id: string): Promise<Gallery | null> {
-  const galleries = await getGalleries();
-  return galleries.find((g) => g.id === id) ?? null;
+  const rows = await sql`SELECT * FROM galleries WHERE id = ${id} LIMIT 1`;
+  return rows.length ? rowToGallery(rows[0]) : null;
 }
 
-export async function saveGallery(gallery: Gallery) {
-  const data = await readData();
-  const idx = data.galleries.findIndex((g) => g.id === gallery.id);
-  if (idx >= 0) {
-    data.galleries[idx] = gallery;
-  } else {
-    data.galleries.push(gallery);
-  }
-  await writeData(data);
+export async function saveGallery(gallery: Gallery): Promise<void> {
+  await sql`
+    INSERT INTO galleries (id, client_name, event_date, event_type, password_hash, photos, cover_photo)
+    VALUES (
+      ${gallery.id},
+      ${gallery.clientName},
+      ${gallery.eventDate},
+      ${gallery.eventType},
+      ${gallery.passwordHash},
+      ${JSON.stringify(gallery.photos)},
+      ${gallery.coverPhoto ?? ''}
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      client_name  = EXCLUDED.client_name,
+      event_date   = EXCLUDED.event_date,
+      event_type   = EXCLUDED.event_type,
+      password_hash = EXCLUDED.password_hash,
+      photos       = EXCLUDED.photos,
+      cover_photo  = EXCLUDED.cover_photo
+  `;
 }
 
-export async function deleteGallery(id: string) {
-  const data = await readData();
-  data.galleries = data.galleries.filter((g) => g.id !== id);
-  await writeData(data);
+export async function deleteGallery(id: string): Promise<void> {
+  await sql`DELETE FROM galleries WHERE id = ${id}`;
 }
 
 export function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password + (process.env.GALLERY_SECRET ?? 'dev')).digest('hex');
+  return crypto
+    .createHash('sha256')
+    .update(password + (process.env.GALLERY_SECRET ?? 'dev'))
+    .digest('hex');
 }
 
 export function verifyPassword(password: string, hash: string): boolean {
