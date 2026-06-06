@@ -63,9 +63,12 @@ export default function Footer() {
         <p className="text-xs text-[#6b6460]">
           © {new Date().getFullYear()} Vision Studios. All rights reserved.
         </p>
-        <p className="text-xs text-[#6b6460]">
-          Wedding &amp; Event Photography
-        </p>
+        <div className="flex items-center gap-6">
+          <p className="text-xs text-[#6b6460]">Wedding &amp; Event Photography</p>
+          <Link href="/admin" className="text-xs text-[#6b6460]/30 hover:text-[#6b6460] transition-colors">
+            Admin
+          </Link>
+        </div>
       </div>
     </footer>
   );
