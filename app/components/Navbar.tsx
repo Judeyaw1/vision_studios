@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Menu, X, Settings } from 'lucide-react';
+import { Menu, X, UserCircle } from 'lucide-react';
 
 const links = [
   { href: '/', label: 'Home' },
@@ -73,7 +73,7 @@ export default function Navbar() {
               className="text-[#f0ebe3]/60 hover:text-[#c9a96e] transition-colors"
               aria-label="Admin"
             >
-              <Settings size={18} />
+              <UserCircle size={22} />
             </Link>
           </li>
         </ul>
