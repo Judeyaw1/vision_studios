@@ -64,10 +64,33 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     setUploadSkipped(0);
     setUploadProgress({ done: 0, total });
 
+    async function compress(file: File): Promise<Blob> {
+      // Only compress if over 3.5MB. Give up after 8s and use original.
+      if (file.size <= 3.5 * 1024 * 1024) return file;
+      return new Promise((resolve) => {
+        const timer = setTimeout(() => resolve(file), 8000);
+        createImageBitmap(file)
+          .then((bitmap) => {
+            const MAX = 2048;
+            const ratio = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(bitmap.width * ratio);
+            canvas.height = Math.round(bitmap.height * ratio);
+            canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(
+              (blob) => { clearTimeout(timer); resolve(blob ?? file); },
+              'image/jpeg', 0.85
+            );
+          })
+          .catch(() => { clearTimeout(timer); resolve(file); });
+      });
+    }
+
     async function processFile(file: File): Promise<string | null> {
+      const body = await compress(file);
       const res = await fetch(
         `/api/admin/photo-upload?galleryId=${galleryId}&filename=${encodeURIComponent(file.name)}`,
-        { method: 'POST', body: file, headers: { 'Content-Type': file.type || 'image/jpeg' } }
+        { method: 'POST', body, headers: { 'Content-Type': 'image/jpeg' } }
       );
       if (!res.ok) {
         const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
