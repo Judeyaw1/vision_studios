@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Upload, Copy, Check, Loader2, ExternalLink, LogOut, ChevronDown, ChevronUp, X } from 'lucide-react';
-import imageCompression from 'browser-image-compression';
+import { upload } from '@vercel/blob/client';
 import type { Gallery } from '@/lib/galleries';
 
 export default function AdminDashboard({ galleries: initial }: { galleries: Gallery[] }) {
@@ -85,28 +85,13 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
       }
       seenThisSession.add(hash);
 
-      let toUpload: File | Blob = file;
-      try {
-        toUpload = await imageCompression(file, {
-          maxSizeMB: 3.5,
-          maxWidthOrHeight: 4096,
-          useWebWorker: false,
-          fileType: 'image/jpeg',
-        });
-      } catch {
-        if (file.size > 4 * 1024 * 1024) return null; // too big, skip
-      }
-
-      const res = await fetch(
-        `/api/admin/photo-upload?galleryId=${galleryId}&filename=${encodeURIComponent(file.name)}`,
-        { method: 'POST', body: toUpload, headers: { 'Content-Type': 'image/jpeg' } }
+      // Upload directly from browser to Vercel Blob — no server size limit
+      const blob = await upload(
+        `galleries/${galleryId}/${Date.now()}-${file.name}`,
+        file,
+        { access: 'public', handleUploadUrl: '/api/admin/upload-token' }
       );
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: res.statusText }));
-        throw new Error(err.error || 'Upload failed');
-      }
-      const { url } = await res.json();
-      return { url, hash };
+      return { url: blob.url, hash };
     }
 
     try {
