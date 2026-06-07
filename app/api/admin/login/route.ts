@@ -19,7 +19,8 @@ export async function POST(req: NextRequest) {
   // Session cookie — no maxAge means it expires when the browser closes
   res.cookies.set('admin_session', makeAdminToken(), {
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: 'lax',
+    secure: true,
     path: '/',
   });
   return res;
