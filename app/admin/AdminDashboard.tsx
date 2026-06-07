@@ -115,7 +115,8 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
 
         const batchUrls: string[] = [];
 
-        for (const result of settled) {
+        for (let j = 0; j < settled.length; j++) {
+          const result = settled[j];
           done++;
           if (result.status === 'fulfilled' && result.value) {
             batchUrls.push(result.value);
@@ -123,7 +124,9 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
             skipped++;
             setUploadSkipped(skipped);
             if (result.status === 'rejected') {
-              setUploadError(result.reason?.message ?? 'Upload failed');
+              const reason = result.reason?.message ?? 'Upload failed';
+              const name = batch[j]?.name ?? 'unknown file';
+              setUploadError(`${name}: ${reason}`);
             }
           }
           setUploadProgress({ done, total });
@@ -342,7 +345,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                           <Loader2 size={12} className="animate-spin shrink-0" />
                           {uploadProgress.done} / {uploadProgress.total} uploaded
                           {uploadSkipped > 0 && (
-                            <span className="text-[#6b6460]">· {uploadSkipped} duplicate{uploadSkipped > 1 ? 's' : ''} skipped</span>
+                            <span className="text-[#6b6460]">· {uploadSkipped} skipped (too large or unsupported)</span>
                           )}
                         </div>
                         <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
