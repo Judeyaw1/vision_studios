@@ -71,21 +71,31 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     setUploadProgress({ done: 0, total });
 
     async function compress(file: File): Promise<Blob> {
-      // Only compress if over 3.5MB. Give up after 8s and use original.
-      if (file.size <= 3.5 * 1024 * 1024) return file;
+      // Always compress — keeps files well under Vercel's 4.5MB body limit.
       return new Promise((resolve) => {
-        const timer = setTimeout(() => resolve(file), 8000);
+        const timer = setTimeout(() => resolve(file), 10000);
         createImageBitmap(file)
           .then((bitmap) => {
-            const MAX = 2048;
+            const MAX = 1920;
             const ratio = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
             const canvas = document.createElement('canvas');
             canvas.width = Math.round(bitmap.width * ratio);
             canvas.height = Math.round(bitmap.height * ratio);
             canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
             canvas.toBlob(
-              (blob) => { clearTimeout(timer); resolve(blob ?? file); },
-              'image/jpeg', 0.85
+              (blob) => {
+                clearTimeout(timer);
+                // If compressed result is still large, try again at lower quality
+                if (blob && blob.size > 3.5 * 1024 * 1024) {
+                  canvas.toBlob(
+                    (b2) => resolve(b2 ?? blob),
+                    'image/jpeg', 0.65
+                  );
+                } else {
+                  resolve(blob ?? file);
+                }
+              },
+              'image/jpeg', 0.82
             );
           })
           .catch(() => { clearTimeout(timer); resolve(file); });
