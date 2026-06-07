@@ -27,8 +27,11 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     router.refresh();
   }
 
+  const [createError, setCreateError] = useState('');
+
   async function createGallery(e: React.FormEvent) {
     e.preventDefault();
+    setCreateError('');
     const res = await fetch('/api/admin/galleries', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -39,6 +42,9 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
       setGalleries((prev) => [...prev, g]);
       setForm({ clientName: '', eventDate: '', eventType: 'Wedding', password: '' });
       setCreating(false);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setCreateError(data.error ?? `Failed (${res.status}) — make sure you are logged in`);
     }
   }
 
@@ -248,6 +254,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                 />
               </div>
             </div>
+            {createError && <p className="text-red-400 text-xs">{createError}</p>}
             <div className="flex gap-3">
               <button type="submit" className="text-xs tracking-[0.2em] uppercase px-6 py-3 bg-[#c9a96e] text-[#0c0b09] hover:bg-[#f0ebe3] transition-colors">
                 Create Gallery

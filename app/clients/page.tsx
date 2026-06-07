@@ -11,17 +11,25 @@ export default function ClientsPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  function extractId(input: string): string {
+    const trimmed = input.trim();
+    // Accept full URL like https://site.com/clients/some-id-abc123
+    const match = trimmed.match(/\/clients\/([^/?#]+)/);
+    return match ? match[1] : trimmed;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!code.trim()) return;
     setLoading(true);
     setError('');
-    const res = await fetch(`/api/clients/check?id=${encodeURIComponent(code.trim())}`);
+    const id = extractId(code);
+    const res = await fetch(`/api/clients/check?id=${encodeURIComponent(id)}`);
     setLoading(false);
     if (res.ok) {
-      router.push(`/clients/${encodeURIComponent(code.trim())}`);
+      router.push(`/clients/${encodeURIComponent(id)}`);
     } else {
-      setError('Gallery not found. Check your code and try again.');
+      setError('Gallery not found. Make sure you copied the full code or link from your photographer.');
     }
   }
 
@@ -44,7 +52,7 @@ export default function ClientsPage() {
           Your Gallery
         </h1>
         <p className="text-[#6b6460] text-sm mb-10">
-          Enter the gallery code shared by your photographer to view and download your photos.
+          Paste the gallery link or code shared by your photographer.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -52,8 +60,8 @@ export default function ClientsPage() {
             type="text"
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder="Enter your gallery code"
-            className="w-full bg-transparent border border-white/20 px-5 py-4 text-[#f0ebe3] placeholder:text-[#6b6460] focus:border-[#c9a96e] focus:outline-none transition-colors text-sm text-center tracking-widest"
+            placeholder="Gallery code or full link"
+            className="w-full bg-transparent border border-white/20 px-5 py-4 text-[#f0ebe3] placeholder:text-[#6b6460] focus:border-[#c9a96e] focus:outline-none transition-colors text-sm text-center"
           />
           {error && <p className="text-red-400 text-xs">{error}</p>}
           <button
