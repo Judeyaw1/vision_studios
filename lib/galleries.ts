@@ -3,6 +3,7 @@ import crypto from 'crypto';
 
 export type Gallery = {
   id: string;
+  accessCode: string;
   clientName: string;
   eventDate: string;
   eventType: string;
@@ -16,6 +17,7 @@ export type Gallery = {
 function rowToGallery(row: Record<string, unknown>): Gallery {
   return {
     id: row.id as string,
+    accessCode: (row.access_code as string) ?? '',
     clientName: row.client_name as string,
     eventDate: (row.event_date as string) ?? '',
     eventType: (row.event_type as string) ?? 'Session',
@@ -33,15 +35,21 @@ export async function getGalleries(): Promise<Gallery[]> {
 }
 
 export async function getGallery(id: string): Promise<Gallery | null> {
-  const rows = await sql`SELECT * FROM galleries WHERE id = ${id} LIMIT 1`;
+  // Match by access_code (case-insensitive) first, then by internal id
+  const rows = await sql`
+    SELECT * FROM galleries
+    WHERE LOWER(access_code) = LOWER(${id}) OR id = ${id}
+    LIMIT 1
+  `;
   return rows.length ? rowToGallery(rows[0]) : null;
 }
 
 export async function saveGallery(gallery: Gallery): Promise<void> {
   await sql`
-    INSERT INTO galleries (id, client_name, event_date, event_type, password_hash, photos, photo_hashes, cover_photo)
+    INSERT INTO galleries (id, access_code, client_name, event_date, event_type, password_hash, photos, photo_hashes, cover_photo)
     VALUES (
       ${gallery.id},
+      ${gallery.accessCode || null},
       ${gallery.clientName},
       ${gallery.eventDate},
       ${gallery.eventType},
@@ -51,6 +59,7 @@ export async function saveGallery(gallery: Gallery): Promise<void> {
       ${gallery.coverPhoto ?? ''}
     )
     ON CONFLICT (id) DO UPDATE SET
+      access_code   = EXCLUDED.access_code,
       client_name   = EXCLUDED.client_name,
       event_date    = EXCLUDED.event_date,
       event_type    = EXCLUDED.event_type,

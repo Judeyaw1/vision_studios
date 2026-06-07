@@ -9,7 +9,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
   const [galleries, setGalleries] = useState(initial);
   const [creating, setCreating] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [form, setForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding', password: '' });
+  const [form, setForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding', password: '', accessCode: '' });
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0 });
   const [uploadError, setUploadError] = useState('');
@@ -40,7 +40,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     if (res.ok) {
       const g = await res.json();
       setGalleries((prev) => [...prev, g]);
-      setForm({ clientName: '', eventDate: '', eventType: 'Wedding', password: '' });
+      setForm({ clientName: '', eventDate: '', eventType: 'Wedding', password: '', accessCode: '' });
       setCreating(false);
     } else {
       const data = await res.json().catch(() => ({}));
@@ -253,6 +253,16 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                   className="w-full bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] placeholder:text-[#6b6460]/60 focus:border-[#c9a96e] focus:outline-none text-sm"
                 />
               </div>
+              <div>
+                <label className="text-xs text-[#6b6460] block mb-1">Access Code <span className="text-[#6b6460]/50">(simple code client types)</span></label>
+                <input
+                  type="text"
+                  value={form.accessCode}
+                  onChange={(e) => setForm((f) => ({ ...f, accessCode: e.target.value.toUpperCase() }))}
+                  placeholder="e.g. OHEMAA2024"
+                  className="w-full bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] placeholder:text-[#6b6460]/60 focus:border-[#c9a96e] focus:outline-none text-sm tracking-widest"
+                />
+              </div>
             </div>
             {createError && <p className="text-red-400 text-xs">{createError}</p>}
             <div className="flex gap-3">
@@ -290,9 +300,11 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                     <p className="text-[#6b6460] text-xs">{g.photos.length} photo{g.photos.length !== 1 ? 's' : ''}</p>
                     <div className="flex items-center gap-2 mt-2">
                       <p className="text-xs text-[#6b6460]">Client code:</p>
-                      <code className="text-xs text-[#c9a96e] bg-white/5 px-2 py-0.5 rounded font-mono">{g.id}</code>
+                      <code className="text-sm text-[#c9a96e] bg-white/5 px-2 py-0.5 rounded font-mono tracking-widest">
+                        {g.accessCode || g.id}
+                      </code>
                       <button
-                        onClick={() => { navigator.clipboard.writeText(g.id); setCopied(`code-${g.id}`); setTimeout(() => setCopied(null), 2000); }}
+                        onClick={() => { navigator.clipboard.writeText(g.accessCode || g.id); setCopied(`code-${g.id}`); setTimeout(() => setCopied(null), 2000); }}
                         className="text-[#6b6460] hover:text-[#c9a96e] transition-colors"
                         title="Copy code"
                       >

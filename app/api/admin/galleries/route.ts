@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (!isAdminAuthed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { clientName, eventDate, eventType, password } = await req.json();
+  const { clientName, eventDate, eventType, password, accessCode } = await req.json();
   if (!clientName || !password) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
 
   const gallery = {
     id,
+    accessCode: accessCode ? accessCode.trim().toUpperCase() : '',
     clientName,
     eventDate: eventDate ?? '',
     eventType: eventType ?? 'Session',
