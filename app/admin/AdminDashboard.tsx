@@ -281,7 +281,17 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                       </p>
                     )}
                     <p className="text-[#6b6460] text-xs">{g.photos.length} photo{g.photos.length !== 1 ? 's' : ''}</p>
-                    <p className="text-[#6b6460]/50 text-xs mt-1 font-mono">/clients/{g.id}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <p className="text-xs text-[#6b6460]">Client code:</p>
+                      <code className="text-xs text-[#c9a96e] bg-white/5 px-2 py-0.5 rounded font-mono">{g.id}</code>
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(g.id); setCopied(`code-${g.id}`); setTimeout(() => setCopied(null), 2000); }}
+                        className="text-[#6b6460] hover:text-[#c9a96e] transition-colors"
+                        title="Copy code"
+                      >
+                        {copied === `code-${g.id}` ? <Check size={11} className="text-[#c9a96e]" /> : <Copy size={11} />}
+                      </button>
+                    </div>
                   </div>
 
                   {uploadError && (
