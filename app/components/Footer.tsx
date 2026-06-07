@@ -5,7 +5,7 @@ import { Share2, ExternalLink, Mail } from 'lucide-react';
 export default function Footer() {
   return (
     <footer className="border-t border-white/8 mt-32">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16 grid md:grid-cols-3 gap-12">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12 sm:py-16 grid md:grid-cols-3 gap-8 md:gap-12">
         <div>
           <Link href="/" className="inline-block">
             <Image

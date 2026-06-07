@@ -59,7 +59,7 @@ export default function PortfolioPage() {
   return (
     <main className="pt-20">
       {/* Header */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-20">
+      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-12 sm:py-20">
         <p className="text-xs tracking-[0.3em] uppercase text-[#c9a96e] mb-4">Our Work</p>
         <h1 className="font-serif text-5xl sm:text-6xl font-light text-[#f0ebe3]">Portfolio</h1>
       </section>
@@ -133,7 +133,7 @@ export default function PortfolioPage() {
           </button>
 
           <div
-            className="relative max-w-5xl max-h-[85vh] w-full mx-16"
+            className="relative max-w-5xl max-h-[85vh] w-full mx-4 sm:mx-16"
             onClick={(e) => e.stopPropagation()}
           >
             <Image

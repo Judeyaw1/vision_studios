@@ -72,7 +72,7 @@ export default function GalleryView({ clientName, eventDate, eventType, photos }
   return (
     <main className="pt-20 min-h-screen">
       {/* Header */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-12 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-8 sm:py-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6">
         <div>
           <p className="text-xs tracking-[0.3em] uppercase text-[#c9a96e] mb-2">{eventType}</p>
           <h1 className="font-serif text-4xl sm:text-5xl font-light text-[#f0ebe3]">{clientName}</h1>
@@ -160,7 +160,7 @@ export default function GalleryView({ clientName, eventDate, eventType, photos }
             <ChevronLeft size={32} />
           </button>
 
-          <div className="relative max-w-5xl max-h-[85vh] w-full mx-16" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-w-5xl max-h-[85vh] w-full mx-4 sm:mx-16" onClick={(e) => e.stopPropagation()}>
             <Image
               src={photos[lightbox]}
               alt={`Photo ${lightbox + 1}`}

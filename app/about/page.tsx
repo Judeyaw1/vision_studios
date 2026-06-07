@@ -45,7 +45,7 @@ export default function AboutPage() {
       </section>
 
       {/* Bio */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-28 grid md:grid-cols-2 gap-20 items-start">
+      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-14 sm:py-28 grid md:grid-cols-2 gap-10 md:gap-20 items-start">
         <div>
           <p className="text-xs tracking-[0.3em] uppercase text-[#c9a96e] mb-5">Meet the Artist</p>
           <h2 className="font-serif text-4xl font-light text-[#f0ebe3] mb-8 leading-tight">
@@ -96,11 +96,11 @@ export default function AboutPage() {
       </section>
 
       {/* Values */}
-      <section className="bg-[#111009] py-24">
+      <section className="bg-[#111009] py-14 sm:py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <p className="text-xs tracking-[0.3em] uppercase text-[#c9a96e] mb-5">How We Work</p>
           <h2 className="font-serif text-4xl font-light text-[#f0ebe3] mb-16">Our Approach</h2>
-          <div className="grid md:grid-cols-3 gap-12">
+          <div className="grid md:grid-cols-3 gap-8 md:gap-12">
             {values.map(({ title, body }) => (
               <div key={title}>
                 <div className="w-8 h-px bg-[#c9a96e] mb-6" />
@@ -113,7 +113,7 @@ export default function AboutPage() {
       </section>
 
       {/* What we offer */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
+      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-14 sm:py-24">
         <p className="text-xs tracking-[0.3em] uppercase text-[#c9a96e] mb-5">Specialities</p>
         <h2 className="font-serif text-4xl font-light text-[#f0ebe3] mb-12">What We Capture</h2>
         <ul className="space-y-5">
@@ -127,8 +127,8 @@ export default function AboutPage() {
       </section>
 
       {/* Gallery row */}
-      <section className="bg-[#111009] py-24">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 grid md:grid-cols-2 gap-16 items-center">
+      <section className="bg-[#111009] py-14 sm:py-24">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 grid md:grid-cols-2 gap-10 md:gap-16 items-center">
           <div className="grid grid-cols-2 gap-4">
             <div className="relative h-64">
               <Image src="/images/0M0A6831.jpeg" alt="Wedding couple" fill className="object-cover object-top" sizes="25vw" />

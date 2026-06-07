@@ -36,8 +36,8 @@ export default function Home() {
       </section>
 
       {/* Teaser Gallery */}
-      <section id="teaser" className="max-w-7xl mx-auto px-6 lg:px-12 py-28">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+      <section id="teaser" className="max-w-7xl mx-auto px-6 lg:px-12 py-14 sm:py-28">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 sm:mb-14">
           <div>
             <p className="text-xs tracking-[0.3em] uppercase text-[#c9a96e] mb-3">Our Work</p>
             <h2 className="font-serif text-4xl sm:text-5xl font-light text-[#f0ebe3]">
@@ -52,7 +52,7 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 auto-rows-[450px] md:auto-rows-[520px]">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4 auto-rows-[260px] sm:auto-rows-[360px] md:auto-rows-[520px]">
           {teaserPhotos.map((photo, i) => (
             <div key={i} className={`relative overflow-hidden group ${photo.span}`}>
               <Image
@@ -69,9 +69,9 @@ export default function Home() {
       </section>
 
       {/* Philosophy */}
-      <section className="bg-[#111009] py-28">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 grid md:grid-cols-2 gap-16 items-center">
-          <div className="relative h-[500px]">
+      <section className="bg-[#111009] py-14 sm:py-28">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 grid md:grid-cols-2 gap-8 md:gap-16 items-center">
+          <div className="relative h-64 sm:h-96 md:h-125">
             <Image
               src="/images/0M0A0764.jpeg"
               alt="Photographer at work"
@@ -106,7 +106,7 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="relative overflow-hidden py-36">
+      <section className="relative overflow-hidden py-20 sm:py-36">
         <Image
           src="/images/0M0A6742.jpeg"
           alt="Wedding ceremony"

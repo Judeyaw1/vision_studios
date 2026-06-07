@@ -337,7 +337,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
 
                     {/* Upload */}
                     {uploading === g.id ? (
-                      <div className="flex flex-col gap-1 min-w-35">
+                      <div className="flex flex-col gap-1 w-full sm:min-w-35">
                         <div className="flex items-center gap-2 text-xs text-[#c9a96e]">
                           <Loader2 size={12} className="animate-spin shrink-0" />
                           {uploadProgress.done} / {uploadProgress.total} uploaded
@@ -387,7 +387,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                     {g.photos.length === 0 ? (
                       <p className="text-[#6b6460] text-sm">No photos uploaded yet.</p>
                     ) : (
-                      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
                         {g.photos.map((url) => (
                           <div key={url} className="relative group aspect-square overflow-hidden bg-white/5">
                             {/* eslint-disable-next-line @next/next/no-img-element */}

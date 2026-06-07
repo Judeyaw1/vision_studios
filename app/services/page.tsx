@@ -119,7 +119,7 @@ export default function ServicesPage() {
           {packages.map((pkg) => (
             <div
               key={pkg.name}
-              className={`relative flex flex-col p-8 border transition-colors ${
+              className={`relative flex flex-col p-5 sm:p-8 border transition-colors ${
                 pkg.featured
                   ? 'border-[#c9a96e] bg-[#111009]'
                   : 'border-white/8 hover:border-white/20'
@@ -196,7 +196,7 @@ export default function ServicesPage() {
       </section>
 
       {/* CTA with photo */}
-      <section className="relative overflow-hidden py-36">
+      <section className="relative overflow-hidden py-20 sm:py-36">
         <Image
           src="/images/0M0A6742.jpeg"
           alt="Wedding ceremony"

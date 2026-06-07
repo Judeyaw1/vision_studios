@@ -40,7 +40,7 @@ export default function Navbar() {
             alt="Vision Studios"
             width={320}
             height={120}
-            className="h-30 w-auto object-contain"
+            className="h-16 sm:h-24 w-auto object-contain"
             priority
           />
         </Link>
