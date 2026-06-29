@@ -4,9 +4,26 @@ import { ArrowRight, Check } from 'lucide-react';
 
 const packages = [
   {
+    name: 'The Classic',
+    price: '$400 per hour',
+    duration: 'Up to 8 hours',
+    ideal: 'Starting package for most weddings',
+    features: [
+      '2 photographers',
+      'Up to 8 hours coverage',
+      '50 edited images',
+      'Private online gallery',
+      'Engagement session included',
+      '2-week delivery',
+      'Print release',
+      'Wedding morning coverage',
+    ],
+    featured: false,
+  },
+  {
     name: 'Elopement',
     price: '$300 per hour',
-    duration: 'Up to 1 hours',
+    duration: 'Up to 4 hours',
     ideal: 'Intimate ceremonies, micro-weddings',
     features: [
       '1 photographer',
@@ -16,23 +33,6 @@ const packages = [
       '2-week delivery',
       'Extra on added hours',
       'Extra on travel outside DMV',
-    ],
-    featured: false,
-  },
-  {
-    name: 'The Classic',
-    price: '$4,800',
-    duration: 'Up to 8 hours',
-    ideal: 'Most popular — full-day weddings',
-    features: [
-      '2 photographers',
-      'Up to 8 hours coverage',
-      '600+ edited images',
-      'Private online gallery',
-      'Engagement session included',
-      '2-week delivery',
-      'Print release',
-      'Wedding morning coverage',
     ],
     featured: true,
   },
@@ -59,10 +59,10 @@ const packages = [
 
 const addOns = [
   { name: 'Fine-art album (30 pages)', price: '$850' },
-  { name: 'Additional hours (per hour)', price: '$350' },
-  { name: 'Engagement session', price: '$600' },
-  { name: 'Portrait / headshot session', price: '$700' },
-  { name: 'Rush delivery (1 week)', price: '$400' },
+  { name: 'Additional hours (per hour)', price: '$250' },
+  { name: 'Engagement session', price: '$450' },
+  { name: 'Portrait / headshot session', price: '$120' },
+  { name: 'Rush delivery (1 week)', price: '$250' },
   { name: 'Travel outside DMV', price: 'Custom quote' },
 ];
 

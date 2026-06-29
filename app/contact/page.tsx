@@ -183,12 +183,12 @@ export default function ContactPage() {
                     value={form.phone}
                     onChange={handleChange}
                     className="w-full bg-transparent border border-white/15 px-4 py-3 text-[#f0ebe3] placeholder:text-[#6b6460]/60 focus:border-[#c9a96e] focus:outline-none transition-colors text-sm"
-                    placeholder="+1 555 000 0000"
+                    placeholder="+1 (240) 941-7140"
                   />
                 </div>
                 <div>
                   <label className="text-xs tracking-[0.2em] uppercase text-[#6b6460] block mb-2">
-                    Wedding Date *
+                    Event Date *
                   </label>
                   <input
                     type="date"
@@ -241,8 +241,8 @@ export default function ContactPage() {
                   className="w-full bg-[#0c0b09] border border-white/15 px-4 py-3 text-[#f0ebe3] focus:border-[#c9a96e] focus:outline-none transition-colors text-sm"
                 >
                   <option value="">Not sure yet</option>
-                  <option value="Elopement">Elopement — $2,400</option>
-                  <option value="The Classic">The Classic — $4,800</option>
+                  <option value="Elopement">Elopement — $300</option>
+                  <option value="The Classic">The Classic — $400</option>
                   <option value="The Legacy">The Legacy — $7,500</option>
                   <option value="Custom">Custom / Let&apos;s discuss</option>
                 </select>
