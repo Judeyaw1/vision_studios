@@ -5,16 +5,17 @@ import { ArrowRight, Check } from 'lucide-react';
 const packages = [
   {
     name: 'Elopement',
-    price: '$2,400',
-    duration: 'Up to 4 hours',
+    price: '$300 per hour',
+    duration: 'Up to 1 hours',
     ideal: 'Intimate ceremonies, micro-weddings',
     features: [
       '1 photographer',
-      'Up to 4 hours coverage',
-      '300+ edited images',
+      'Up to 1 hours coverage',
+      '25 edited images',
       'Private online gallery',
       '2-week delivery',
-      'Print release',
+      'Extra on added hours',
+      'Extra on travel outside DMV',
     ],
     featured: false,
   },

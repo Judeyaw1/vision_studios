@@ -70,35 +70,49 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     setUploadSkipped(0);
     setUploadProgress({ done: 0, total });
 
-    async function compress(file: File): Promise<Blob> {
-      // Always compress — keeps files well under Vercel's 4.5MB body limit.
+    function drawToCanvas(source: HTMLImageElement | ImageBitmap, file: File): Promise<Blob> {
       return new Promise((resolve) => {
-        const timer = setTimeout(() => resolve(file), 10000);
-        createImageBitmap(file)
-          .then((bitmap) => {
-            const MAX = 1920;
-            const ratio = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
-            const canvas = document.createElement('canvas');
-            canvas.width = Math.round(bitmap.width * ratio);
-            canvas.height = Math.round(bitmap.height * ratio);
-            canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-            canvas.toBlob(
-              (blob) => {
-                clearTimeout(timer);
-                // If compressed result is still large, try again at lower quality
-                if (blob && blob.size > 3.5 * 1024 * 1024) {
-                  canvas.toBlob(
-                    (b2) => resolve(b2 ?? blob),
-                    'image/jpeg', 0.65
-                  );
-                } else {
-                  resolve(blob ?? file);
-                }
-              },
-              'image/jpeg', 0.82
-            );
-          })
-          .catch(() => { clearTimeout(timer); resolve(file); });
+        const w = source instanceof HTMLImageElement ? source.naturalWidth : source.width;
+        const h = source instanceof HTMLImageElement ? source.naturalHeight : source.height;
+        const MAX = 1920;
+        const ratio = Math.min(1, MAX / Math.max(w, h));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(w * ratio);
+        canvas.height = Math.round(h * ratio);
+        canvas.getContext('2d')!.drawImage(source as CanvasImageSource, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (!blob || blob.size > 3.5 * 1024 * 1024) {
+            canvas.toBlob((b2) => resolve(b2 ?? blob ?? file), 'image/jpeg', 0.65);
+          } else {
+            resolve(blob);
+          }
+        }, 'image/jpeg', 0.82);
+      });
+    }
+
+    async function compress(file: File): Promise<Blob> {
+      // Try createImageBitmap first (fast, works for JPEG/PNG/WebP)
+      try {
+        const bitmap = await createImageBitmap(file);
+        return await drawToCanvas(bitmap, file);
+      } catch { /* fall through */ }
+
+      // Fallback: use <img> element (works for HEIC on Safari/iOS)
+      return new Promise((resolve) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        const timer = setTimeout(() => { URL.revokeObjectURL(url); resolve(file); }, 10000);
+        img.onload = () => {
+          clearTimeout(timer);
+          URL.revokeObjectURL(url);
+          drawToCanvas(img, file).then(resolve);
+        };
+        img.onerror = () => {
+          clearTimeout(timer);
+          URL.revokeObjectURL(url);
+          resolve(file); // give up, send original
+        };
+        img.src = url;
       });
     }
 

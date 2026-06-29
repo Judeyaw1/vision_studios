@@ -67,15 +67,6 @@ export default function Navbar() {
               Book Now
             </Link>
           </li>
-          <li>
-            <Link
-              href="/admin"
-              className="text-[#f0ebe3]/60 hover:text-[#c9a96e] transition-colors"
-              aria-label="Admin"
-            >
-              <UserCircle size={22} />
-            </Link>
-          </li>
         </ul>
 
         {/* Mobile toggle */}
