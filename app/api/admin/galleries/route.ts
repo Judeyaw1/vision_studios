@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getGalleries, saveGallery, updateGalleryDetails, deleteGallery, hashPassword } from '@/lib/galleries';
+import { getGalleries, saveGallery, updateGalleryDetails, isAccessCodeTaken, deleteGallery, hashPassword } from '@/lib/galleries';
 import { makeAdminToken } from '../login/route';
 
 function isAdminAuthed(req: NextRequest) {
@@ -41,9 +41,14 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   if (!isAdminAuthed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { id, clientName, eventDate, eventType } = await req.json();
+  const { id, clientName, eventDate, eventType, accessCode } = await req.json();
   if (!id || !clientName?.trim()) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+  }
+
+  const code = accessCode ? accessCode.trim().toUpperCase() : '';
+  if (code && (await isAccessCodeTaken(code, id))) {
+    return NextResponse.json({ error: 'That client code is already in use' }, { status: 409 });
   }
 
   // The id stays fixed even when the name changes — it is baked into the link
@@ -52,6 +57,7 @@ export async function PATCH(req: NextRequest) {
     clientName: clientName.trim(),
     eventDate: eventDate ?? '',
     eventType: eventType || 'Session',
+    accessCode: code,
   });
   if (!gallery) return NextResponse.json({ error: 'Gallery not found' }, { status: 404 });
 

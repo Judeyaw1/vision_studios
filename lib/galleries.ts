@@ -74,17 +74,30 @@ export async function saveGallery(gallery: Gallery): Promise<void> {
 // that an in-flight upload is writing to the same row.
 export async function updateGalleryDetails(
   id: string,
-  fields: { clientName: string; eventDate: string; eventType: string },
+  fields: { clientName: string; eventDate: string; eventType: string; accessCode: string },
 ): Promise<Gallery | null> {
   const rows = await sql`
     UPDATE galleries
     SET client_name = ${fields.clientName},
         event_date  = ${fields.eventDate},
-        event_type  = ${fields.eventType}
+        event_type  = ${fields.eventType},
+        access_code = ${fields.accessCode || null}
     WHERE id = ${id}
     RETURNING *
   `;
   return rows.length ? rowToGallery(rows[0]) : null;
+}
+
+// getGallery resolves a code against both access_code and id, so a duplicate of
+// either would make the client link ambiguous.
+export async function isAccessCodeTaken(code: string, excludeId: string): Promise<boolean> {
+  const rows = await sql`
+    SELECT 1 FROM galleries
+    WHERE id <> ${excludeId}
+      AND (LOWER(access_code) = LOWER(${code}) OR LOWER(id) = LOWER(${code}))
+    LIMIT 1
+  `;
+  return rows.length > 0;
 }
 
 export async function deleteGallery(id: string): Promise<void> {

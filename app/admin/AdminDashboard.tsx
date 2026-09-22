@@ -51,14 +51,14 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
   }
 
   const [editing, setEditing] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding' });
+  const [editForm, setEditForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding', accessCode: '' });
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState('');
 
   function startEditing(g: Gallery) {
     setEditing(g.id);
     setEditError('');
-    setEditForm({ clientName: g.clientName, eventDate: g.eventDate, eventType: g.eventType });
+    setEditForm({ clientName: g.clientName, eventDate: g.eventDate, eventType: g.eventType, accessCode: g.accessCode });
   }
 
   async function saveEdit(e: React.FormEvent, id: string) {
@@ -370,6 +370,17 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                             className="bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] focus:border-[#c9a96e] focus:outline-none text-sm scheme-dark"
                           />
                         </div>
+                        <input
+                          value={editForm.accessCode}
+                          onChange={(e) => setEditForm((f) => ({ ...f, accessCode: e.target.value.toUpperCase() }))}
+                          placeholder="Client code (e.g. OHEMAA2024)"
+                          className="w-full bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] placeholder:text-[#6b6460]/60 focus:border-[#c9a96e] focus:outline-none text-sm font-mono tracking-widest"
+                        />
+                        {editForm.accessCode !== g.accessCode && (
+                          <p className="text-[#c9a96e] text-xs">
+                            Changing the code breaks any link or code you already gave this client.
+                          </p>
+                        )}
                         {editError && <p className="text-red-400 text-xs">{editError}</p>}
                         <div className="flex items-center gap-2">
                           <button
