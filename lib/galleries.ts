@@ -70,6 +70,23 @@ export async function saveGallery(gallery: Gallery): Promise<void> {
   `;
 }
 
+// A targeted update rather than saveGallery, so a rename can't clobber photos
+// that an in-flight upload is writing to the same row.
+export async function updateGalleryDetails(
+  id: string,
+  fields: { clientName: string; eventDate: string; eventType: string },
+): Promise<Gallery | null> {
+  const rows = await sql`
+    UPDATE galleries
+    SET client_name = ${fields.clientName},
+        event_date  = ${fields.eventDate},
+        event_type  = ${fields.eventType}
+    WHERE id = ${id}
+    RETURNING *
+  `;
+  return rows.length ? rowToGallery(rows[0]) : null;
+}
+
 export async function deleteGallery(id: string): Promise<void> {
   await sql`DELETE FROM galleries WHERE id = ${id}`;
 }

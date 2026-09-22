@@ -2,8 +2,10 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Upload, Copy, Check, Loader2, ExternalLink, LogOut, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Plus, Trash2, Upload, Copy, Check, Loader2, ExternalLink, LogOut, ChevronDown, ChevronUp, X, Pencil } from 'lucide-react';
 import type { Gallery } from '@/lib/galleries';
+
+const EVENT_TYPES = ['Wedding', 'Portrait', 'Birthday', 'Event', 'Engagement'];
 
 export default function AdminDashboard({ galleries: initial }: { galleries: Gallery[] }) {
   const [galleries, setGalleries] = useState(initial);
@@ -45,6 +47,37 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     } else {
       const data = await res.json().catch(() => ({}));
       setCreateError(data.error ?? `Failed (${res.status}) — make sure you are logged in`);
+    }
+  }
+
+  const [editing, setEditing] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding' });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState('');
+
+  function startEditing(g: Gallery) {
+    setEditing(g.id);
+    setEditError('');
+    setEditForm({ clientName: g.clientName, eventDate: g.eventDate, eventType: g.eventType });
+  }
+
+  async function saveEdit(e: React.FormEvent, id: string) {
+    e.preventDefault();
+    setSavingEdit(true);
+    setEditError('');
+    const res = await fetch('/api/admin/galleries', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...editForm }),
+    });
+    setSavingEdit(false);
+    if (res.ok) {
+      const updated = await res.json();
+      setGalleries((prev) => prev.map((g) => (g.id === id ? updated : g)));
+      setEditing(null);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setEditError(data.error ?? `Failed (${res.status})`);
     }
   }
 
@@ -262,11 +295,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                   onChange={(e) => setForm((f) => ({ ...f, eventType: e.target.value }))}
                   className="w-full bg-[#0c0b09] border border-white/15 px-4 py-2.5 text-[#f0ebe3] focus:border-[#c9a96e] focus:outline-none text-sm"
                 >
-                  <option>Wedding</option>
-                  <option>Portrait</option>
-                  <option>Birthday</option>
-                  <option>Event</option>
-                  <option>Engagement</option>
+                  {EVENT_TYPES.map((t) => <option key={t}>{t}</option>)}
                 </select>
               </div>
               <div>
@@ -315,14 +344,63 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
               <div key={g.id} className="border border-white/8 p-6 hover:border-white/15 transition-colors">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div>
-                    <div className="flex items-center gap-3 mb-1">
-                      <h2 className="font-serif text-xl text-[#f0ebe3]">{g.clientName}</h2>
-                      <span className="text-xs tracking-[0.15em] uppercase bg-[#c9a96e]/10 text-[#c9a96e] px-2 py-0.5">{g.eventType}</span>
-                    </div>
-                    {g.eventDate && (
-                      <p className="text-[#6b6460] text-sm mb-1">
-                        {new Date(g.eventDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                      </p>
+                    {editing === g.id ? (
+                      <form onSubmit={(e) => saveEdit(e, g.id)} className="mb-3 space-y-2">
+                        <input
+                          required
+                          autoFocus
+                          value={editForm.clientName}
+                          onChange={(e) => setEditForm((f) => ({ ...f, clientName: e.target.value }))}
+                          placeholder="Client name"
+                          className="w-full bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] placeholder:text-[#6b6460]/60 focus:border-[#c9a96e] focus:outline-none text-sm"
+                        />
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <select
+                            value={editForm.eventType}
+                            onChange={(e) => setEditForm((f) => ({ ...f, eventType: e.target.value }))}
+                            className="bg-[#0c0b09] border border-white/15 px-4 py-2.5 text-[#f0ebe3] focus:border-[#c9a96e] focus:outline-none text-sm"
+                          >
+                            {!EVENT_TYPES.includes(editForm.eventType) && <option>{editForm.eventType}</option>}
+                            {EVENT_TYPES.map((t) => <option key={t}>{t}</option>)}
+                          </select>
+                          <input
+                            type="date"
+                            value={editForm.eventDate}
+                            onChange={(e) => setEditForm((f) => ({ ...f, eventDate: e.target.value }))}
+                            className="bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] focus:border-[#c9a96e] focus:outline-none text-sm scheme-dark"
+                          />
+                        </div>
+                        {editError && <p className="text-red-400 text-xs">{editError}</p>}
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="submit"
+                            disabled={savingEdit || !editForm.clientName.trim()}
+                            className="inline-flex items-center gap-2 text-xs tracking-[0.15em] uppercase px-4 py-2 bg-[#c9a96e] text-[#0c0b09] hover:bg-[#f0ebe3] transition-colors disabled:opacity-50"
+                          >
+                            {savingEdit ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditing(null)}
+                            className="text-xs tracking-[0.15em] uppercase px-4 py-2 border border-white/15 text-[#6b6460] hover:text-[#f0ebe3] hover:border-white/30 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-3 mb-1">
+                          <h2 className="font-serif text-xl text-[#f0ebe3]">{g.clientName}</h2>
+                          <span className="text-xs tracking-[0.15em] uppercase bg-[#c9a96e]/10 text-[#c9a96e] px-2 py-0.5">{g.eventType}</span>
+                        </div>
+                        {g.eventDate && (
+                          <p className="text-[#6b6460] text-sm mb-1">
+                            {new Date(g.eventDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                          </p>
+                        )}
+                      </>
                     )}
                     <p className="text-[#6b6460] text-xs">{g.photos.length} photo{g.photos.length !== 1 ? 's' : ''}</p>
                     <div className="flex items-center gap-2 mt-2">
@@ -395,6 +473,14 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                     >
                       {expanded === g.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                       Photos
+                    </button>
+
+                    {/* Edit details */}
+                    <button
+                      onClick={() => (editing === g.id ? setEditing(null) : startEditing(g))}
+                      className="inline-flex items-center gap-2 text-xs tracking-[0.15em] uppercase px-4 py-2 border border-white/15 text-[#6b6460] hover:text-[#f0ebe3] hover:border-white/30 transition-colors"
+                    >
+                      <Pencil size={12} /> Edit
                     </button>
 
                     {/* Delete gallery */}

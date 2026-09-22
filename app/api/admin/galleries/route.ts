@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getGalleries, saveGallery, deleteGallery, hashPassword } from '@/lib/galleries';
+import { getGalleries, saveGallery, updateGalleryDetails, deleteGallery, hashPassword } from '@/lib/galleries';
 import { makeAdminToken } from '../login/route';
 
 function isAdminAuthed(req: NextRequest) {
@@ -36,6 +36,26 @@ export async function POST(req: NextRequest) {
 
   await saveGallery(gallery);
   return NextResponse.json(gallery, { status: 201 });
+}
+
+export async function PATCH(req: NextRequest) {
+  if (!isAdminAuthed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { id, clientName, eventDate, eventType } = await req.json();
+  if (!id || !clientName?.trim()) {
+    return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+  }
+
+  // The id stays fixed even when the name changes — it is baked into the link
+  // clients already have and into their unlock cookie.
+  const gallery = await updateGalleryDetails(id, {
+    clientName: clientName.trim(),
+    eventDate: eventDate ?? '',
+    eventType: eventType || 'Session',
+  });
+  if (!gallery) return NextResponse.json({ error: 'Gallery not found' }, { status: 404 });
+
+  return NextResponse.json(gallery);
 }
 
 export async function DELETE(req: NextRequest) {
