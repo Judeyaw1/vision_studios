@@ -153,7 +153,7 @@ export default function AboutPage() {
               <strong className="text-[#f0ebe3]/60">Phone:</strong> (240) 941-7140
             </p>
             <p className="text-[#6b6460] leading-relaxed mb-8">
-              <strong className="text-[#f0ebe3]/60">Email:</strong> VisionStudios@gmail.com
+              <strong className="text-[#f0ebe3]/60">Email:</strong> Visionstudiosdmv@gmail.com
             </p>
             <Link
               href="/contact"

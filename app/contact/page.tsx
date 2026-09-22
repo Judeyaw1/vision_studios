@@ -81,8 +81,8 @@ export default function ContactPage() {
                 <Mail size={16} className="text-[#c9a96e] mt-1 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-[#6b6460]">Email</p>
-                  <a href="mailto:hello@visionstudio.com" className="text-[#f0ebe3] hover:text-[#c9a96e] transition-colors">
-                    hello@visionstudio.com
+                  <a href="mailto:Visionstudiosdmv@gmail.com" className="text-[#f0ebe3] hover:text-[#c9a96e] transition-colors">
+                    Visionstudiosdmv@gmail.com
                   </a>
                 </div>
               </li>
@@ -90,15 +90,15 @@ export default function ContactPage() {
                 <Phone size={16} className="text-[#c9a96e] mt-1 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-[#6b6460]">Phone</p>
-                  <a href="tel:+15550001234" className="text-[#f0ebe3] hover:text-[#c9a96e] transition-colors">
-                    +1 (555) 000-1234
+                  <a href="tel:+12409417140" className="text-[#f0ebe3] hover:text-[#c9a96e] transition-colors">
+                    +1 (240) 941-7140
                   </a>
                 </div>
               </li>
               <li className="flex items-start gap-4">
                 <MapPin size={16} className="text-[#c9a96e] mt-1 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-[#6b6460]">Based in</p>
+                  <p className="text-sm text-[#6b6460]">Based in</p> 
                   <span className="text-[#f0ebe3]">Maryland — DMV Area & Beyond</span>
                 </div>
               </li>

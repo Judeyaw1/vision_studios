@@ -50,11 +50,11 @@ export default function Footer() {
             <a href="#" aria-label="Facebook" className="text-[#6b6460] hover:text-[#c9a96e] transition-colors">
               <ExternalLink size={18} />
             </a>
-            <a href="mailto:VisionStudios@gmail.com" aria-label="Email" className="text-[#6b6460] hover:text-[#c9a96e] transition-colors">
+            <a href="mailto:Visionstudiosdmv@gmail.com" aria-label="Email" className="text-[#6b6460] hover:text-[#c9a96e] transition-colors">
               <Mail size={18} />
             </a>
           </div>
-          <p className="text-sm text-[#6b6460]">VisionStudios@gmail.com</p>
+          <p className="text-sm text-[#6b6460]">Visionstudiosdmv@gmail.com</p>
           <p className="text-sm text-[#6b6460] mt-1">(240) 941-7140</p>
         </div>
       </div>
