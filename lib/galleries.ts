@@ -74,15 +74,22 @@ export async function deleteGallery(id: string): Promise<void> {
   await sql`DELETE FROM galleries WHERE id = ${id}`;
 }
 
-export function hashPassword(password: string): string {
+function digest(input: string): string {
   return crypto
     .createHash('sha256')
-    .update(password + (process.env.GALLERY_SECRET ?? 'dev'))
+    .update(input + (process.env.GALLERY_SECRET ?? 'dev'))
     .digest('hex');
 }
 
+export function hashPassword(password: string): string {
+  return digest(password.toLowerCase());
+}
+
 export function verifyPassword(password: string, hash: string): boolean {
-  return hashPassword(password) === hash;
+  // Galleries created before passwords were case-normalized stored a digest of
+  // the exact string, and the plaintext is unrecoverable, so those can only be
+  // matched as typed.
+  return hashPassword(password) === hash || digest(password) === hash;
 }
 
 export function makeSessionToken(galleryId: string): string {
