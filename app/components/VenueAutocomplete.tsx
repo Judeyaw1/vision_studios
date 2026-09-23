@@ -100,7 +100,7 @@ export default function VenueAutocomplete({ value, onChange }: Props) {
                   : 'text-[#6b6460] hover:bg-white/5 hover:text-[#f0ebe3]'
               }`}
             >
-              <MapPin size={13} className="text-[#c9a96e] flex-shrink-0 mt-0.5" />
+              <MapPin size={13} className="text-[#c9a96e] shrink-0 mt-0.5" />
               <span className="leading-snug line-clamp-2">{s.display_name}</span>
             </li>
           ))}

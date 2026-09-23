@@ -98,7 +98,7 @@ export default function ServicesPage() {
           className="object-cover object-top"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0c0b09] via-[#0c0b09]/30 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-[#0c0b09] via-[#0c0b09]/30 to-transparent" />
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 w-full">
           <p className="text-xs tracking-[0.3em] uppercase text-[#c9a96e] mb-3">Investment</p>
           <h1 className="font-serif text-5xl sm:text-6xl font-light text-[#f0ebe3]">Services &amp; Pricing</h1>
@@ -145,7 +145,7 @@ export default function ServicesPage() {
               <ul className="space-y-3 mb-10 flex-1">
                 {pkg.features.map((f) => (
                   <li key={f} className="flex items-start gap-3">
-                    <Check size={14} className="text-[#c9a96e] flex-shrink-0 mt-0.5" />
+                    <Check size={14} className="text-[#c9a96e] shrink-0 mt-0.5" />
                     <span className="text-sm text-[#6b6460]">{f}</span>
                   </li>
                 ))}
@@ -175,7 +175,7 @@ export default function ServicesPage() {
             {addOns.map(({ name, price }) => (
               <div key={name} className="bg-[#111009] p-6 flex justify-between items-center">
                 <span className="text-[#6b6460] text-sm">{name}</span>
-                <span className="font-serif text-lg text-[#c9a96e] ml-4 flex-shrink-0">{price}</span>
+                <span className="font-serif text-lg text-[#c9a96e] ml-4 shrink-0">{price}</span>
               </div>
             ))}
           </div>

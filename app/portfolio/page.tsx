@@ -71,7 +71,7 @@ export default function PortfolioPage() {
             <button
               key={cat}
               onClick={() => { setActive(cat); setIndex(-1); }}
-              className={`flex-shrink-0 text-xs tracking-[0.2em] uppercase px-5 py-2 transition-all ${
+              className={`shrink-0 text-xs tracking-[0.2em] uppercase px-5 py-2 transition-all ${
                 active === cat
                   ? 'bg-[#c9a96e] text-[#0c0b09]'
                   : 'text-[#6b6460] hover:text-[#f0ebe3]'

@@ -78,7 +78,7 @@ export default function ContactPage() {
             <p className="text-xs tracking-[0.25em] uppercase text-[#c9a96e] mb-5">Contact</p>
             <ul className="space-y-5">
               <li className="flex items-start gap-4">
-                <Mail size={16} className="text-[#c9a96e] mt-1 flex-shrink-0" />
+                <Mail size={16} className="text-[#c9a96e] mt-1 shrink-0" />
                 <div>
                   <p className="text-sm text-[#6b6460]">Email</p>
                   <a href="mailto:Visionstudiosdmv@gmail.com" className="text-[#f0ebe3] hover:text-[#c9a96e] transition-colors">
@@ -87,7 +87,7 @@ export default function ContactPage() {
                 </div>
               </li>
               <li className="flex items-start gap-4">
-                <Phone size={16} className="text-[#c9a96e] mt-1 flex-shrink-0" />
+                <Phone size={16} className="text-[#c9a96e] mt-1 shrink-0" />
                 <div>
                   <p className="text-sm text-[#6b6460]">Phone</p>
                   <a href="tel:+12409417140" className="text-[#f0ebe3] hover:text-[#c9a96e] transition-colors">
@@ -96,7 +96,7 @@ export default function ContactPage() {
                 </div>
               </li>
               <li className="flex items-start gap-4">
-                <MapPin size={16} className="text-[#c9a96e] mt-1 flex-shrink-0" />
+                <MapPin size={16} className="text-[#c9a96e] mt-1 shrink-0" />
                 <div>
                   <p className="text-sm text-[#6b6460]">Based in</p> 
                   <span className="text-[#f0ebe3]">Maryland — DMV Area & Beyond</span>
@@ -196,7 +196,7 @@ export default function ContactPage() {
                     required
                     value={form.date}
                     onChange={handleChange}
-                    className="w-full bg-transparent border border-white/15 px-4 py-3 text-[#f0ebe3] focus:border-[#c9a96e] focus:outline-none transition-colors text-sm [color-scheme:dark]"
+                    className="w-full bg-transparent border border-white/15 px-4 py-3 text-[#f0ebe3] focus:border-[#c9a96e] focus:outline-none transition-colors text-sm scheme-dark"
                   />
                 </div>
               </div>

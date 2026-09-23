@@ -65,7 +65,7 @@ export default function CoverFocusEditor({ imageUrl, initial, saving, error, onS
           </div>
           <div>
             <p className="text-[10px] tracking-[0.2em] uppercase text-[#6b6460] mb-1.5">Phone</p>
-            <div className="w-16 sm:w-20 aspect-[9/19] overflow-hidden bg-white/5">
+            <div className="w-16 sm:w-20 aspect-9/19 overflow-hidden bg-white/5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={imageUrl} alt="" className="w-full h-full object-cover" style={{ objectPosition }} />
             </div>

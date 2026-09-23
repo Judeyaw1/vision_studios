@@ -37,7 +37,7 @@ export default function AboutPage() {
           className="object-cover object-center"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0c0b09] via-[#0c0b09]/20 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-[#0c0b09] via-[#0c0b09]/20 to-transparent" />
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 w-full">
           <p className="text-xs tracking-[0.3em] uppercase text-[#c9a96e] mb-3">About</p>
           <h1 className="font-serif text-5xl sm:text-6xl font-light text-[#f0ebe3]">The Story</h1>
@@ -119,7 +119,7 @@ export default function AboutPage() {
         <ul className="space-y-5">
           {awards.map((item) => (
             <li key={item} className="flex items-center gap-5 border-b border-white/5 pb-5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#c9a96e] flex-shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c9a96e] shrink-0" />
               <span className="text-[#6b6460]">{item}</span>
             </li>
           ))}
