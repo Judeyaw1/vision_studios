@@ -2,8 +2,9 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Upload, Copy, Check, Loader2, ExternalLink, LogOut, ChevronDown, ChevronUp, X, Pencil, Star } from 'lucide-react';
+import { Plus, Trash2, Upload, Copy, Check, Loader2, ExternalLink, LogOut, ChevronDown, ChevronUp, X, Pencil, Star, Crosshair } from 'lucide-react';
 import type { Gallery } from '@/lib/galleries';
+import CoverFocusEditor, { type Focus } from './CoverFocusEditor';
 
 const EVENT_TYPES = ['Wedding', 'Portrait', 'Birthday', 'Event', 'Engagement'];
 
@@ -243,10 +244,34 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     });
     setSettingCover(null);
     if (res.ok) {
-      setGalleries((prev) => prev.map((g) => (g.id === galleryId ? { ...g, coverPhoto: photoUrl } : g)));
+      // The server also clears the focal point, which belonged to the previous cover image.
+      setGalleries((prev) => prev.map((g) => (g.id === galleryId ? { ...g, coverPhoto: photoUrl, coverFocus: null } : g)));
     } else {
       const data = await res.json().catch(() => ({}));
       setCoverError(data.error ?? `Could not set cover (${res.status})`);
+    }
+  }
+
+  const [focusOpen, setFocusOpen] = useState<string | null>(null);
+  const [savingFocus, setSavingFocus] = useState(false);
+  const [focusError, setFocusError] = useState('');
+
+  async function saveCoverFocus(galleryId: string, focus: Focus) {
+    setSavingFocus(true);
+    setFocusError('');
+    const res = await fetch('/api/admin/set-cover-focus', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ galleryId, ...focus }),
+    });
+    setSavingFocus(false);
+    if (res.ok) {
+      const saved: Focus = await res.json();
+      setGalleries((prev) => prev.map((g) => (g.id === galleryId ? { ...g, coverFocus: saved } : g)));
+      setFocusOpen(null);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setFocusError(data.error ?? `Could not save focus (${res.status})`);
     }
   }
 
@@ -522,6 +547,23 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                       <p className="text-[#6b6460] text-sm">No photos uploaded yet.</p>
                     ) : (
                       <>
+                        <button
+                          onClick={() => { setFocusOpen(focusOpen === g.id ? null : g.id); setFocusError(''); }}
+                          className="mb-4 inline-flex items-center gap-2 text-xs tracking-[0.15em] uppercase px-4 py-2 border border-white/15 text-[#6b6460] hover:text-[#f0ebe3] hover:border-white/30 transition-colors"
+                        >
+                          <Crosshair size={12} /> Cover focus
+                        </button>
+                        {focusOpen === g.id && (
+                          <CoverFocusEditor
+                            key={g.coverPhoto || g.photos[0]}
+                            imageUrl={g.coverPhoto || g.photos[0]}
+                            initial={g.coverFocus ?? null}
+                            saving={savingFocus}
+                            error={focusError}
+                            onSave={(focus) => saveCoverFocus(g.id, focus)}
+                            onClose={() => setFocusOpen(null)}
+                          />
+                        )}
                         <p className="text-xs text-[#6b6460] mb-3">
                           Hover a photo (or tap on a phone) and press the star to make it the cover clients see first.
                         </p>

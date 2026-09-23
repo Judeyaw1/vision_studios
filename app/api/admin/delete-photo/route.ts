@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { del } from '@vercel/blob';
-import { getGallery, saveGallery } from '@/lib/galleries';
+import { getGallery, saveGallery, clearCoverFocus } from '@/lib/galleries';
 import { makeAdminToken } from '../login/route';
 
 function isAdminAuthed(req: NextRequest) {
@@ -27,10 +27,13 @@ export async function DELETE(req: NextRequest) {
   if (idx >= 0 && gallery.photoHashes?.length) {
     gallery.photoHashes = gallery.photoHashes.filter((_, i) => i !== idx);
   }
-  if (gallery.coverPhoto === photoUrl) {
+  const coverRemoved = gallery.coverPhoto === photoUrl;
+  if (coverRemoved) {
     gallery.coverPhoto = gallery.photos[0] ?? '';
   }
   await saveGallery(gallery);
+  // The focal point belonged to the deleted cover, not its replacement.
+  if (coverRemoved) await clearCoverFocus(gallery.id);
 
   // Delete from Vercel Blob
   try {

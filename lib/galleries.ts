@@ -10,6 +10,8 @@ export type Gallery = {
   photos: string[];
   photoHashes: string[];
   coverPhoto?: string;
+  // Focal point of the cover as percentages of the image; null means the default crop.
+  coverFocus?: { x: number; y: number } | null;
   createdAt: string;
 };
 
@@ -24,6 +26,10 @@ function rowToGallery(row: Record<string, unknown>): Gallery {
     photos: (row.photos as string[]) ?? [],
     photoHashes: (row.photo_hashes as string[]) ?? [],
     coverPhoto: (row.cover_photo as string) ?? '',
+    coverFocus:
+      row.cover_focus_x != null && row.cover_focus_y != null
+        ? { x: row.cover_focus_x as number, y: row.cover_focus_y as number }
+        : null,
     createdAt: (row.created_at as Date).toISOString(),
   };
 }
@@ -89,14 +95,28 @@ export async function updateGalleryDetails(
 
 // Targeted like updateGalleryDetails so it can't clobber photos an upload is writing.
 // The containment check keeps a cover from pointing at a photo outside this gallery.
+// The focal point belongs to the old cover image, so a new cover starts from the default crop.
 export async function setCoverPhoto(id: string, photoUrl: string): Promise<boolean> {
   const rows = await sql`
     UPDATE galleries
-    SET cover_photo = ${photoUrl}
+    SET cover_photo = ${photoUrl}, cover_focus_x = NULL, cover_focus_y = NULL
     WHERE id = ${id} AND photos @> ${JSON.stringify([photoUrl])}::jsonb
     RETURNING id
   `;
   return rows.length > 0;
+}
+
+export async function setCoverFocus(id: string, x: number, y: number): Promise<boolean> {
+  const rows = await sql`
+    UPDATE galleries SET cover_focus_x = ${x}, cover_focus_y = ${y}
+    WHERE id = ${id}
+    RETURNING id
+  `;
+  return rows.length > 0;
+}
+
+export async function clearCoverFocus(id: string): Promise<void> {
+  await sql`UPDATE galleries SET cover_focus_x = NULL, cover_focus_y = NULL WHERE id = ${id}`;
 }
 
 // getGallery resolves a code against both access_code and id, so a duplicate of

@@ -20,6 +20,7 @@ export default async function GalleryPage({ params }: { params: Promise<{ galler
       eventType={gallery.eventType}
       photos={gallery.photos}
       coverPhoto={gallery.coverPhoto}
+      coverFocus={gallery.coverFocus}
     />
   );
 }

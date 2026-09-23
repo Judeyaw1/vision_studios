@@ -12,11 +12,13 @@ type Props = {
   eventType: string;
   photos: string[];
   coverPhoto?: string;
+  coverFocus?: { x: number; y: number } | null;
 };
 
 const COVER_FADE_MS = 700;
+const DEFAULT_COVER_POSITION = '50% 30%';
 
-export default function GalleryView({ clientName, eventDate, eventType, photos, coverPhoto }: Props) {
+export default function GalleryView({ clientName, eventDate, eventType, photos, coverPhoto, coverFocus }: Props) {
   const [lightbox, setLightbox] = useState(-1);
   const [zipping, setZipping] = useState(false);
   const [phase, setPhase] = useState<'cover' | 'leaving' | 'gallery'>('cover');
@@ -109,7 +111,7 @@ export default function GalleryView({ clientName, eventDate, eventType, photos, 
             fill
             priority
             className="object-cover"
-            style={{ objectPosition: '50% 30%' }}
+            style={{ objectPosition: coverFocus ? `${coverFocus.x}% ${coverFocus.y}%` : DEFAULT_COVER_POSITION }}
             sizes="100vw"
           />
         )}
