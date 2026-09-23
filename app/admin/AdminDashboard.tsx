@@ -398,7 +398,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                         </div>
                         {g.eventDate && (
                           <p className="text-[#6b6460] text-sm mb-1">
-                            {new Date(g.eventDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            {new Date(g.eventDate).toLocaleDateString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' })}
                           </p>
                         )}
                       </>
