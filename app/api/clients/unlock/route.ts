@@ -13,9 +13,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Incorrect password' }, { status: 401 });
   }
 
-  const token = makeSessionToken(galleryId);
+  // Keyed by the internal id, not the typed code: codes are free text and may
+  // contain characters that are illegal in a cookie name.
+  const token = makeSessionToken(gallery.id);
   const res = NextResponse.json({ ok: true });
-  res.cookies.set(`gallery_${galleryId}`, token, {
+  res.cookies.set(`gallery_${gallery.id}`, token, {
     httpOnly: true,
     sameSite: 'lax',
     maxAge: 60 * 60 * 24 * 7,

@@ -24,8 +24,10 @@ export default function UnlockForm({ galleryId, clientName }: { galleryId: strin
     setLoading(false);
     if (res.ok) {
       router.refresh();
-    } else {
+    } else if (res.status === 401) {
       setError('Incorrect password. Please try again.');
+    } else {
+      setError(`Could not open this gallery (error ${res.status}). Please contact your photographer.`);
     }
   }
 
