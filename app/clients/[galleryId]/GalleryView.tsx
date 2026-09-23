@@ -115,7 +115,7 @@ export default function GalleryView({ clientName, eventDate, eventType, photos, 
             sizes="100vw"
           />
         )}
-        <div className="absolute inset-0 bg-[#0c0b09]/75" />
+        <div className="absolute inset-0 bg-[#0c0b09]/70" />
 
         <div className="relative z-10 w-full max-w-2xl mx-auto px-6 py-28 text-center">
           <p className="text-xs tracking-[0.35em] uppercase text-[#c9a96e] mb-6">{eventType}</p>
