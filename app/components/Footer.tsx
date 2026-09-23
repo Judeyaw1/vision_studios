@@ -1,6 +1,29 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Share2, ExternalLink, Mail } from 'lucide-react';
+import { ExternalLink, Mail } from 'lucide-react';
+
+const INSTAGRAM_URL = 'https://www.instagram.com/visionstudiosdmv?stkn=ajBnYjI5cXM5OGVj';
+
+// lucide-react dropped its brand icons, so the Instagram glyph is drawn inline.
+function InstagramIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
 
 export default function Footer() {
   return (
@@ -44,8 +67,14 @@ export default function Footer() {
         <div>
           <p className="text-xs tracking-[0.2em] uppercase text-[#c9a96e] mb-5">Connect</p>
           <div className="flex gap-4 mb-6">
-            <a href="#" aria-label="Instagram" className="text-[#6b6460] hover:text-[#c9a96e] transition-colors">
-              <Share2 size={18} />
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Vision Studios on Instagram"
+              className="text-[#6b6460] hover:text-[#c9a96e] transition-colors"
+            >
+              <InstagramIcon />
             </a>
             <a href="#" aria-label="Facebook" className="text-[#6b6460] hover:text-[#c9a96e] transition-colors">
               <ExternalLink size={18} />
