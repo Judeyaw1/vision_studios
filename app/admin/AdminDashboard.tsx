@@ -370,10 +370,11 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                             className="bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] focus:border-[#c9a96e] focus:outline-none text-sm scheme-dark"
                           />
                         </div>
+                        <label className="block text-xs text-[#6b6460] pt-1">Client code <span className="text-[#6b6460]/50">(what the client types to find the gallery)</span></label>
                         <input
                           value={editForm.accessCode}
                           onChange={(e) => setEditForm((f) => ({ ...f, accessCode: e.target.value.toUpperCase() }))}
-                          placeholder="Client code (e.g. OHEMAA2024)"
+                          placeholder="e.g. OHEMAA2024"
                           className="w-full bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] placeholder:text-[#6b6460]/60 focus:border-[#c9a96e] focus:outline-none text-sm font-mono tracking-widest"
                         />
                         {editForm.accessCode !== g.accessCode && (
@@ -381,10 +382,11 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                             Changing the code breaks any link or code you already gave this client.
                           </p>
                         )}
+                        <label className="block text-xs text-[#6b6460] pt-1">New password <span className="text-[#6b6460]/50">(leave blank to keep the current one)</span></label>
                         <input
                           value={editForm.password}
                           onChange={(e) => setEditForm((f) => ({ ...f, password: e.target.value }))}
-                          placeholder="New password (leave blank to keep current)"
+                          placeholder="Only fill in to change it"
                           className="w-full bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] placeholder:text-[#6b6460]/60 focus:border-[#c9a96e] focus:outline-none text-sm"
                         />
                         {editError && <p className="text-red-400 text-xs">{editError}</p>}
