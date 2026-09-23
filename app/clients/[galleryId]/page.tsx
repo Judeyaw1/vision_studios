@@ -1,7 +1,5 @@
-import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { getGallery, makeSessionToken } from '@/lib/galleries';
-import UnlockForm from './UnlockForm';
+import { getGallery } from '@/lib/galleries';
 import GalleryView from './GalleryView';
 
 export default async function GalleryPage({ params }: { params: Promise<{ galleryId: string }> }) {
@@ -13,14 +11,6 @@ export default async function GalleryPage({ params }: { params: Promise<{ galler
 
   const gallery = await getGallery(galleryId);
   if (!gallery) notFound();
-
-  const cookieStore = await cookies();
-  const token = cookieStore.get(`gallery_${gallery.id}`)?.value;
-  const isUnlocked = token === makeSessionToken(gallery.id);
-
-  if (!isUnlocked) {
-    return <UnlockForm galleryId={galleryId} clientName={gallery.clientName} />;
-  }
 
   return (
     <GalleryView

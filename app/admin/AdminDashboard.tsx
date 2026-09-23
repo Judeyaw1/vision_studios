@@ -11,7 +11,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
   const [galleries, setGalleries] = useState(initial);
   const [creating, setCreating] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [form, setForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding', password: '', accessCode: '' });
+  const [form, setForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding', accessCode: '' });
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0 });
   const [uploadError, setUploadError] = useState('');
@@ -42,7 +42,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
     if (res.ok) {
       const g = await res.json();
       setGalleries((prev) => [...prev, g]);
-      setForm({ clientName: '', eventDate: '', eventType: 'Wedding', password: '', accessCode: '' });
+      setForm({ clientName: '', eventDate: '', eventType: 'Wedding', accessCode: '' });
       setCreating(false);
     } else {
       const data = await res.json().catch(() => ({}));
@@ -51,14 +51,14 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
   }
 
   const [editing, setEditing] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding', accessCode: '', password: '' });
+  const [editForm, setEditForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding', accessCode: '' });
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState('');
 
   function startEditing(g: Gallery) {
     setEditing(g.id);
     setEditError('');
-    setEditForm({ clientName: g.clientName, eventDate: g.eventDate, eventType: g.eventType, accessCode: g.accessCode, password: '' });
+    setEditForm({ clientName: g.clientName, eventDate: g.eventDate, eventType: g.eventType, accessCode: g.accessCode });
   }
 
   async function saveEdit(e: React.FormEvent, id: string) {
@@ -299,17 +299,6 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                 </select>
               </div>
               <div>
-                <label className="text-xs text-[#6b6460] block mb-1">Gallery Password *</label>
-                <input
-                  required
-                  type="text"
-                  value={form.password}
-                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                  placeholder="e.g. sunshine2024"
-                  className="w-full bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] placeholder:text-[#6b6460]/60 focus:border-[#c9a96e] focus:outline-none text-sm"
-                />
-              </div>
-              <div>
                 <label className="text-xs text-[#6b6460] block mb-1">Access Code <span className="text-[#6b6460]/50">(simple code client types)</span></label>
                 <input
                   type="text"
@@ -370,7 +359,7 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                             className="bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] focus:border-[#c9a96e] focus:outline-none text-sm scheme-dark"
                           />
                         </div>
-                        <label className="block text-xs text-[#6b6460] pt-1">Client code <span className="text-[#6b6460]/50">(what the client types to find the gallery)</span></label>
+                        <label className="block text-xs text-[#6b6460] pt-1">Client code <span className="text-[#6b6460]/50">(what the client types to open the gallery)</span></label>
                         <input
                           value={editForm.accessCode}
                           onChange={(e) => setEditForm((f) => ({ ...f, accessCode: e.target.value.toUpperCase() }))}
@@ -382,13 +371,6 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                             Changing the code breaks any link or code you already gave this client.
                           </p>
                         )}
-                        <label className="block text-xs text-[#6b6460] pt-1">New password <span className="text-[#6b6460]/50">(leave blank to keep the current one)</span></label>
-                        <input
-                          value={editForm.password}
-                          onChange={(e) => setEditForm((f) => ({ ...f, password: e.target.value }))}
-                          placeholder="Only fill in to change it"
-                          className="w-full bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] placeholder:text-[#6b6460]/60 focus:border-[#c9a96e] focus:outline-none text-sm"
-                        />
                         {editError && <p className="text-red-400 text-xs">{editError}</p>}
                         <div className="flex items-center gap-2">
                           <button

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getGalleries, saveGallery, updateGalleryDetails, isAccessCodeTaken, deleteGallery, hashPassword } from '@/lib/galleries';
+import { getGalleries, saveGallery, updateGalleryDetails, isAccessCodeTaken, deleteGallery } from '@/lib/galleries';
 import { makeAdminToken } from '../login/route';
 
 function isAdminAuthed(req: NextRequest) {
@@ -14,8 +14,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (!isAdminAuthed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { clientName, eventDate, eventType, password, accessCode } = await req.json();
-  if (!clientName || !password) {
+  const { clientName, eventDate, eventType, accessCode } = await req.json();
+  if (!clientName) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
 
@@ -28,7 +28,8 @@ export async function POST(req: NextRequest) {
     clientName,
     eventDate: eventDate ?? '',
     eventType: eventType ?? 'Session',
-    passwordHash: hashPassword(password),
+    // Galleries are opened by code alone; the column is NOT NULL, so store empty.
+    passwordHash: '',
     photos: [],
     photoHashes: [],
     createdAt: new Date().toISOString(),
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   if (!isAdminAuthed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { id, clientName, eventDate, eventType, accessCode, password } = await req.json();
+  const { id, clientName, eventDate, eventType, accessCode } = await req.json();
   if (!id || !clientName?.trim()) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
@@ -58,7 +59,6 @@ export async function PATCH(req: NextRequest) {
     eventDate: eventDate ?? '',
     eventType: eventType || 'Session',
     accessCode: code,
-    passwordHash: password?.trim() ? hashPassword(password.trim()) : null,
   });
   if (!gallery) return NextResponse.json({ error: 'Gallery not found' }, { status: 404 });
 

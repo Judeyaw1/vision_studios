@@ -1,5 +1,4 @@
 import sql from './db';
-import crypto from 'crypto';
 
 export type Gallery = {
   id: string;
@@ -74,21 +73,14 @@ export async function saveGallery(gallery: Gallery): Promise<void> {
 // that an in-flight upload is writing to the same row.
 export async function updateGalleryDetails(
   id: string,
-  fields: {
-    clientName: string;
-    eventDate: string;
-    eventType: string;
-    accessCode: string;
-    passwordHash: string | null;
-  },
+  fields: { clientName: string; eventDate: string; eventType: string; accessCode: string },
 ): Promise<Gallery | null> {
   const rows = await sql`
     UPDATE galleries
-    SET client_name   = ${fields.clientName},
-        event_date    = ${fields.eventDate},
-        event_type    = ${fields.eventType},
-        access_code   = ${fields.accessCode || null},
-        password_hash = COALESCE(${fields.passwordHash}, password_hash)
+    SET client_name = ${fields.clientName},
+        event_date  = ${fields.eventDate},
+        event_type  = ${fields.eventType},
+        access_code = ${fields.accessCode || null}
     WHERE id = ${id}
     RETURNING *
   `;
@@ -109,29 +101,4 @@ export async function isAccessCodeTaken(code: string, excludeId: string): Promis
 
 export async function deleteGallery(id: string): Promise<void> {
   await sql`DELETE FROM galleries WHERE id = ${id}`;
-}
-
-function digest(input: string): string {
-  return crypto
-    .createHash('sha256')
-    .update(input + (process.env.GALLERY_SECRET ?? 'dev'))
-    .digest('hex');
-}
-
-export function hashPassword(password: string): string {
-  return digest(password.toLowerCase());
-}
-
-export function verifyPassword(password: string, hash: string): boolean {
-  // Galleries created before passwords were case-normalized stored a digest of
-  // the exact string, and the plaintext is unrecoverable, so those can only be
-  // matched as typed.
-  return hashPassword(password) === hash || digest(password) === hash;
-}
-
-export function makeSessionToken(galleryId: string): string {
-  return crypto
-    .createHmac('sha256', process.env.GALLERY_SECRET ?? 'dev-secret')
-    .update(galleryId)
-    .digest('hex');
 }
