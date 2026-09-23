@@ -87,6 +87,18 @@ export async function updateGalleryDetails(
   return rows.length ? rowToGallery(rows[0]) : null;
 }
 
+// Targeted like updateGalleryDetails so it can't clobber photos an upload is writing.
+// The containment check keeps a cover from pointing at a photo outside this gallery.
+export async function setCoverPhoto(id: string, photoUrl: string): Promise<boolean> {
+  const rows = await sql`
+    UPDATE galleries
+    SET cover_photo = ${photoUrl}
+    WHERE id = ${id} AND photos @> ${JSON.stringify([photoUrl])}::jsonb
+    RETURNING id
+  `;
+  return rows.length > 0;
+}
+
 // getGallery resolves a code against both access_code and id, so a duplicate of
 // either would make the client link ambiguous.
 export async function isAccessCodeTaken(code: string, excludeId: string): Promise<boolean> {

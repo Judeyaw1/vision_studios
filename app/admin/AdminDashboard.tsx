@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Upload, Copy, Check, Loader2, ExternalLink, LogOut, ChevronDown, ChevronUp, X, Pencil } from 'lucide-react';
+import { Plus, Trash2, Upload, Copy, Check, Loader2, ExternalLink, LogOut, ChevronDown, ChevronUp, X, Pencil, Star } from 'lucide-react';
 import type { Gallery } from '@/lib/galleries';
 
 const EVENT_TYPES = ['Wedding', 'Portrait', 'Birthday', 'Event', 'Engagement'];
@@ -228,6 +228,26 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
       )
     );
     setDeletingPhoto(null);
+  }
+
+  const [settingCover, setSettingCover] = useState<string | null>(null);
+  const [coverError, setCoverError] = useState('');
+
+  async function setCover(galleryId: string, photoUrl: string) {
+    setSettingCover(photoUrl);
+    setCoverError('');
+    const res = await fetch('/api/admin/set-cover', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ galleryId, photoUrl }),
+    });
+    setSettingCover(null);
+    if (res.ok) {
+      setGalleries((prev) => prev.map((g) => (g.id === galleryId ? { ...g, coverPhoto: photoUrl } : g)));
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setCoverError(data.error ?? `Could not set cover (${res.status})`);
+    }
   }
 
   function copyLink(id: string) {
@@ -501,29 +521,56 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                     {g.photos.length === 0 ? (
                       <p className="text-[#6b6460] text-sm">No photos uploaded yet.</p>
                     ) : (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
-                        {g.photos.map((url) => (
-                          <div key={url} className="relative group aspect-square overflow-hidden bg-white/5">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={url}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
-                            <button
-                              onClick={() => deletePhoto(g.id, url)}
-                              disabled={deletingPhoto === url}
-                              className="absolute inset-0 bg-[#0c0b09]/0 group-hover:bg-[#0c0b09]/60 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100"
-                              aria-label="Delete photo"
-                            >
-                              {deletingPhoto === url
-                                ? <Loader2 size={18} className="animate-spin text-white" />
-                                : <X size={18} className="text-red-400" />
-                              }
-                            </button>
-                          </div>
-                        ))}
-                      </div>
+                      <>
+                        <p className="text-xs text-[#6b6460] mb-3">
+                          Hover a photo (or tap on a phone) and press the star to make it the cover clients see first.
+                        </p>
+                        {coverError && <p className="text-red-400 text-xs mb-3">{coverError}</p>}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+                          {g.photos.map((url) => {
+                            const isCover = url === (g.coverPhoto || g.photos[0]);
+                            const hoverButton = 'absolute top-1 p-1.5 bg-[#0c0b09]/75 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100 transition-all disabled:opacity-100';
+                            return (
+                              <div
+                                key={url}
+                                className={`relative group aspect-square overflow-hidden bg-white/5 ${isCover ? 'ring-2 ring-inset ring-[#c9a96e]' : ''}`}
+                              >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={url}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
+                                {isCover && (
+                                  <span className="absolute bottom-1 left-1 inline-flex items-center gap-1 bg-[#c9a96e] text-[#0c0b09] text-[10px] tracking-[0.15em] uppercase px-1.5 py-0.5">
+                                    <Star size={10} fill="currentColor" /> Cover
+                                  </span>
+                                )}
+                                {!isCover && (
+                                  <button
+                                    onClick={() => setCover(g.id, url)}
+                                    disabled={settingCover === url}
+                                    className={`${hoverButton} left-1 text-[#f0ebe3] hover:bg-[#c9a96e] hover:text-[#0c0b09]`}
+                                    aria-label="Set as cover photo"
+                                    title="Set as cover"
+                                  >
+                                    {settingCover === url ? <Loader2 size={14} className="animate-spin" /> : <Star size={14} />}
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => deletePhoto(g.id, url)}
+                                  disabled={deletingPhoto === url}
+                                  className={`${hoverButton} right-1 text-red-400 hover:bg-red-500 hover:text-white`}
+                                  aria-label="Delete photo"
+                                  title="Delete photo"
+                                >
+                                  {deletingPhoto === url ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
                     )}
                   </div>
                 )}
