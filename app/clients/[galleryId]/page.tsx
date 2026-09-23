@@ -19,6 +19,7 @@ export default async function GalleryPage({ params }: { params: Promise<{ galler
       eventDate={gallery.eventDate}
       eventType={gallery.eventType}
       photos={gallery.photos}
+      coverPhoto={gallery.coverPhoto}
     />
   );
 }

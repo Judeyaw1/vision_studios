@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
-import { Download, X, ChevronLeft, ChevronRight, ImageIcon, Loader2 } from 'lucide-react';
+import { Download, X, ChevronLeft, ChevronRight, ImageIcon, Loader2, ArrowRight } from 'lucide-react';
 import JSZip from 'jszip';
 
 type Props = {
@@ -11,11 +11,33 @@ type Props = {
   eventDate: string;
   eventType: string;
   photos: string[];
+  coverPhoto?: string;
 };
 
-export default function GalleryView({ clientName, eventDate, eventType, photos }: Props) {
+const COVER_FADE_MS = 700;
+
+export default function GalleryView({ clientName, eventDate, eventType, photos, coverPhoto }: Props) {
   const [lightbox, setLightbox] = useState(-1);
   const [zipping, setZipping] = useState(false);
+  const [phase, setPhase] = useState<'cover' | 'leaving' | 'gallery'>('cover');
+  const enterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (enterTimer.current) clearTimeout(enterTimer.current); }, []);
+
+  function enterGallery() {
+    if (phase !== 'cover') return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+      setPhase('gallery');
+      window.scrollTo(0, 0);
+      return;
+    }
+    setPhase('leaving');
+    enterTimer.current = setTimeout(() => {
+      setPhase('gallery');
+      window.scrollTo(0, 0);
+    }, COVER_FADE_MS);
+  }
 
   const prev = useCallback(() => setLightbox((i) => (i - 1 + photos.length) % photos.length), [photos.length]);
   const next = useCallback(() => setLightbox((i) => (i + 1) % photos.length), [photos.length]);
@@ -65,12 +87,65 @@ export default function GalleryView({ clientName, eventDate, eventType, photos }
     setZipping(false);
   }
 
+  // "2026-08-29" parses as UTC midnight, so formatting in local time shows Aug 28 in the Americas.
   const formattedDate = eventDate
-    ? new Date(eventDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    ? new Date(eventDate).toLocaleDateString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' })
     : null;
 
+  const heroImage = coverPhoto || photos[0] || '';
+
+  if (phase !== 'gallery') {
+    return (
+      <main
+        className={`relative min-h-screen flex items-center justify-center overflow-hidden transition-opacity motion-reduce:transition-none ${
+          phase === 'leaving' ? 'opacity-0' : 'opacity-100'
+        }`}
+        style={{ transitionDuration: `${COVER_FADE_MS}ms` }}
+      >
+        {heroImage && (
+          <Image
+            src={heroImage}
+            alt=""
+            fill
+            priority
+            className="object-cover"
+            style={{ objectPosition: '50% 30%' }}
+            sizes="100vw"
+          />
+        )}
+        <div className="absolute inset-0 bg-[#0c0b09]/75" />
+
+        <div className="relative z-10 w-full max-w-2xl mx-auto px-6 py-28 text-center">
+          <p className="text-xs tracking-[0.35em] uppercase text-[#c9a96e] mb-6">{eventType}</p>
+          <h1 className="font-serif text-5xl sm:text-7xl font-light text-[#f0ebe3] leading-[1.05]">{clientName}</h1>
+          <div className="w-16 h-px bg-[#c9a96e]/60 mx-auto my-8" />
+
+          <div className="space-y-2 text-xs tracking-[0.2em] uppercase">
+            {formattedDate && <p className="text-[#f0ebe3]/80">{formattedDate}</p>}
+            <p className="text-[#f0ebe3]/55">
+              {photos.length > 0 ? `${photos.length} photo${photos.length !== 1 ? 's' : ''}` : 'Photos coming soon'}
+            </p>
+          </div>
+
+          {photos.length > 0 && (
+            <p className="text-[#f0ebe3]/65 text-sm leading-relaxed max-w-sm mx-auto mt-8">
+              Click or tap any photo to view it full size. Download your favourites one at a time, or take them all in a single zip.
+            </p>
+          )}
+
+          <button
+            onClick={enterGallery}
+            className="mt-10 inline-flex items-center gap-3 text-xs tracking-[0.2em] uppercase px-10 py-4 bg-[#c9a96e] text-[#0c0b09] hover:bg-[#f0ebe3] transition-colors duration-300"
+          >
+            View Gallery <ArrowRight size={14} />
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <main className="pt-20 min-h-screen">
+    <main className="pt-20 min-h-screen animate-fade-in motion-reduce:animate-none">
       {/* Header */}
       <section className="max-w-7xl mx-auto px-6 lg:px-12 py-8 sm:py-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6">
         <div>
