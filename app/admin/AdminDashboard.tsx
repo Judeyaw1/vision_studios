@@ -51,14 +51,14 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
   }
 
   const [editing, setEditing] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding', accessCode: '' });
+  const [editForm, setEditForm] = useState({ clientName: '', eventDate: '', eventType: 'Wedding', accessCode: '', password: '' });
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState('');
 
   function startEditing(g: Gallery) {
     setEditing(g.id);
     setEditError('');
-    setEditForm({ clientName: g.clientName, eventDate: g.eventDate, eventType: g.eventType, accessCode: g.accessCode });
+    setEditForm({ clientName: g.clientName, eventDate: g.eventDate, eventType: g.eventType, accessCode: g.accessCode, password: '' });
   }
 
   async function saveEdit(e: React.FormEvent, id: string) {
@@ -381,6 +381,12 @@ export default function AdminDashboard({ galleries: initial }: { galleries: Gall
                             Changing the code breaks any link or code you already gave this client.
                           </p>
                         )}
+                        <input
+                          value={editForm.password}
+                          onChange={(e) => setEditForm((f) => ({ ...f, password: e.target.value }))}
+                          placeholder="New password (leave blank to keep current)"
+                          className="w-full bg-transparent border border-white/15 px-4 py-2.5 text-[#f0ebe3] placeholder:text-[#6b6460]/60 focus:border-[#c9a96e] focus:outline-none text-sm"
+                        />
                         {editError && <p className="text-red-400 text-xs">{editError}</p>}
                         <div className="flex items-center gap-2">
                           <button

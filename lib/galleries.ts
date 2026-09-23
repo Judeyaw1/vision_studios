@@ -74,14 +74,21 @@ export async function saveGallery(gallery: Gallery): Promise<void> {
 // that an in-flight upload is writing to the same row.
 export async function updateGalleryDetails(
   id: string,
-  fields: { clientName: string; eventDate: string; eventType: string; accessCode: string },
+  fields: {
+    clientName: string;
+    eventDate: string;
+    eventType: string;
+    accessCode: string;
+    passwordHash: string | null;
+  },
 ): Promise<Gallery | null> {
   const rows = await sql`
     UPDATE galleries
-    SET client_name = ${fields.clientName},
-        event_date  = ${fields.eventDate},
-        event_type  = ${fields.eventType},
-        access_code = ${fields.accessCode || null}
+    SET client_name   = ${fields.clientName},
+        event_date    = ${fields.eventDate},
+        event_type    = ${fields.eventType},
+        access_code   = ${fields.accessCode || null},
+        password_hash = COALESCE(${fields.passwordHash}, password_hash)
     WHERE id = ${id}
     RETURNING *
   `;

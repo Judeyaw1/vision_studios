@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   if (!isAdminAuthed(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { id, clientName, eventDate, eventType, accessCode } = await req.json();
+  const { id, clientName, eventDate, eventType, accessCode, password } = await req.json();
   if (!id || !clientName?.trim()) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
@@ -58,6 +58,7 @@ export async function PATCH(req: NextRequest) {
     eventDate: eventDate ?? '',
     eventType: eventType || 'Session',
     accessCode: code,
+    passwordHash: password?.trim() ? hashPassword(password.trim()) : null,
   });
   if (!gallery) return NextResponse.json({ error: 'Gallery not found' }, { status: 404 });
 
